@@ -16,7 +16,6 @@ print("=====================================================")
 
 bar_dist = 5
 ladder_step = 15
-ladder_sides = 6
 ladder_thickness = 0.01#0.006
 ladder_zero_thickness = 0.02
 ladder_text_xpos = 1.0
@@ -28,7 +27,7 @@ roll = 0
 pitch_rate = 20
 roll_rate = 5
 
-hud_update_frames = 20
+hud_update_frames = 4
 
 fps = 20
 
