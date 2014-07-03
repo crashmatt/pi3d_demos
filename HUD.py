@@ -13,8 +13,27 @@ print("press escape to escape")
 print("move this terminal window to top of screen to see FPS")
 print("=====================================================")
 
+
+bar_dist = 5
+ladder_step = 15
+ladder_sides = 6
+ladder_thickness = 0.01#0.006
+ladder_zero_thickness = 0.02
+ladder_text_xpos = 1.0
+ladder_text_size = 0.004
+ladder_length = 1.5
+
+pitch = 0
+roll = 0
+pitch_rate = 20
+roll_rate = 5
+
+hud_update_frames = 20
+
+fps = 20
+
 # Setup display and initialise pi3d
-DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=25.0)
+DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
 DISPLAY.set_background(0.0, 0.0, 0.0, 1)      # r,g,b,alpha
 
 fpv_camera = pi3d.Camera.instance()
@@ -29,7 +48,7 @@ fpv_light = pi3d.Light((0, 0, 1))
 #shader = pi3d.Shader("uv_reflect")
 matsh = pi3d.Shader("mat_flat")  #For fixed color
 flatsh = pi3d.Shader("uv_flat")
-flat2dsh = pi3d.Shader("2d_flat")
+#textsh = pi3d.Shader("uv_flat")
 
 #Create textures
 shapeimg = pi3d.Texture("textures/straw1.jpg")
@@ -38,14 +57,7 @@ shapeimg = pi3d.Texture("textures/straw1.jpg")
 ladderFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))   #load ttf font and set the font colour to 'raspberry'
 hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))      #load ttf font and set the font colour to 'raspberry'
 
-bar_dist = 5
-ladder_step = 15
-ladder_sides = 6
-ladder_thickness = 0.01#0.006
-ladder_zero_thickness = 0.02
-ladder_text_xpos = 1.0
-ladder_text_size = 0.004
-ladder_length = 1.5
+textFont = pi3d.Font("fonts/FreeSans.ttf", color=(128,255,128,255))
 
 #build the bar shapes
 upper_bars = pi3d.MergeShape(camera = fpv_camera)
@@ -59,22 +71,22 @@ bar_shape = pi3d.Plane(camera=fpv_camera,  w=ladder_length, h=ladder_thickness)
 bar_steps = int(180 / ladder_step)
 
 for step in xrange(1, bar_steps):
-    angle = step*ladder_step
-    ypos = bar_dist * math.sin(math.radians(angle))
-    zpos = bar_dist * math.cos(math.radians(angle))
-    
-    upper_bars.add(bar_shape, x=0, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
-    lower_bars.add(bar_shape, x=0, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
-    
-    num_str = "%01d" % angle
-    ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
-    bar_text.add(ladder_str, x=ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
-    bar_text.add(ladder_str, x=-ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
+   angle = step*ladder_step
+   ypos = bar_dist * math.sin(math.radians(angle))
+   zpos = bar_dist * math.cos(math.radians(angle))
+   
+   upper_bars.add(bar_shape, x=0, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
+   lower_bars.add(bar_shape, x=0, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
+   
+   num_str = "%01d" % angle
+   ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
+   bar_text.add(ladder_str, x=ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
+   bar_text.add(ladder_str, x=-ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
 
-    num_str = "%01d" % -angle
-    ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
-    bar_text.add(ladder_str, x=ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
-    bar_text.add(ladder_str, x=-ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
+   num_str = "%01d" % -angle
+   ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
+   bar_text.add(ladder_str, x=ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
+   bar_text.add(ladder_str, x=-ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
 
 center_bars.add(bar_shape, x=0, y=0, z=bar_dist, rx=0, ry=0, rz=0)
 ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string="0", sx=ladder_text_size, sy=ladder_text_size)
@@ -102,18 +114,18 @@ bar_text.set_draw_details(flatsh, [], 1.0, 0.1)
 #bar_text.set_material((100, 0, 0, 0.5))
 bar_text.set_alpha(0.1)
 
-light_shape = pi3d.Cylinder(camera=fpv_camera, radius=0.1, height=0.1, sides=36, rx=90, ry=0, rz=0)
-light_shape.position(0, 0, 1.5)
-light_shape.set_draw_details(matsh, [shapeimg], 1.0, 0.1)
-light_shape.set_material((100, 0, 0, 0.5))
-light_shape.set_alpha(0.1)
+#light_shape = pi3d.Cylinder(camera=fpv_camera, radius=0.1, height=0.1, sides=36, rx=90, ry=0, rz=0)
+#light_shape.position(0, 0, 1.5)
+#light_shape.set_draw_details(matsh, [shapeimg], 1.0, 0.1)
+#light_shape.set_material((100, 0, 0, 0.5))
+#light_shape.set_alpha(0.1)
 
-roll_string = pi3d.String(camera=hud_camera, font=hudFont, string="0000")
-roll_string.translate(1.2, 0.5, 2)
+roll_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
+roll_string.translate(1.2, 0.5, 1)
 roll_string.set_shader(flatsh)
 
-pitch_string = pi3d.String(camera=hud_camera, font=hudFont, string="0000")
-pitch_string.translate(1.2, 0.7, 2)
+pitch_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
+pitch_string.translate(1.2, 0.7, 1)
 pitch_string.set_shader(flatsh)
 
 mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 123456789")
@@ -121,49 +133,57 @@ mystring.translate(0.0, 0.0, 2)
 mystring.set_shader(flatsh)
 
 tick = 0
-av_fps = 25
-i_n=0
+av_fps = fps
+#i_n=0
 spf = 1.0 # seconds per frame, i.e. water image change
 next_time = time.time() + spf
-pitch = 0
-roll = 0
-pitch_rate = 20
 
 # Fetch key presses.
 mykeys = pi3d.Keyboard()
 fr = 0
 
-
+hud_update_frame = 0
 timestamp = time.clock()
+
 
 # Display scene and rotate shape
 while DISPLAY.loop_running():
 
-  text_camera.reset(is_3d=False)
+#  text_camera.reset(is_3d=True)
   hud_camera.reset(is_3d=True)
   fpv_camera.reset(is_3d=True)
+#  text_camera.reset(is_3d=False)
+  
+  fpv_camera.rotate(0,0,roll)
   fpv_camera.rotate(pitch,0,0)
-
-#  light_shape.draw()
-  upper_bars.draw()
-  lower_bars.draw()
-  bar_text.draw()
-  center_bars.draw()
   
 #  upper_bars.rotateToZ(0) 
 #  lower_bars.rotateToZ(0) 
 #  light_shape.rotateToZ(0) 
 #  bar_text.rotateToX(0)
-  center_bars.rotateToX(0)
+#  center_bars.rotateToX(0)
 
-  pstr = "%01d" % pitch
-  pitch_string = pi3d.String(camera=hud_camera, font=hudFont, string=pstr)
-  pitch_string.translate(1.2, 0.7, 2)
-  pitch_string.set_shader(flatsh)
+  if(hud_update_frame == 0):
+      tmpstr = "%01d" % pitch
+      pitch_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
+      pitch_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.35, 1)
+      pitch_string.set_shader(flatsh)
+    
+      tmpstr = "%01d" % roll
+      roll_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
+      roll_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.25, 1)
+      roll_string.set_shader(flatsh)
 
   pitch_string.draw()
-  mystring.draw()
   roll_string.draw()
+#  mystring.draw()   # just to make the ladder text appear???
+
+#  light_shape.draw()
+  bar_text.draw()
+  upper_bars.draw()
+  lower_bars.draw()
+  center_bars.draw()
+
 
   if time.time() > next_time:
     next_time = time.time() + spf
@@ -174,7 +194,11 @@ while DISPLAY.loop_running():
   tick += 1
 
   pitch += pitch_rate / av_fps
-  roll += 1
+  roll += roll_rate / av_fps
+  
+  hud_update_frame += 1
+  if(hud_update_frame > hud_update_frames):
+      hud_update_frame = 0
   
   # Temporary
   if(pitch > 360):
