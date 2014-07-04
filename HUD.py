@@ -53,12 +53,19 @@ flatsh = pi3d.Shader("uv_flat")
 #Create textures
 shapeimg = pi3d.Texture("textures/straw1.jpg")
 
+print("start creating fonts")
 #fonts
-ladderFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))   #load ttf font and set the font colour to 'raspberry'
-hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))      #load ttf font and set the font colour to 'raspberry'
+hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))
 
-textFont = pi3d.Font("fonts/FreeSans.ttf", color=(128,255,128,255))
+#ladderFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))
+#textFont = pi3d.Font("fonts/FreeSans.ttf", color=(128,255,128,255))
+ladderFont = hudFont
+textFont = hudFont
 
+print("end creating fonts")
+
+
+print("start creating ladder")
 #build the bar shapes
 upper_bars = pi3d.MergeShape(camera = fpv_camera)
 lower_bars = pi3d.MergeShape(camera = fpv_camera)
@@ -114,27 +121,32 @@ bar_text.set_draw_details(flatsh, [], 1.0, 0.1)
 #bar_text.set_material((100, 0, 0, 0.5))
 bar_text.set_alpha(0.1)
 
+print("end creating ladder")
+
+
 #light_shape = pi3d.Cylinder(camera=fpv_camera, radius=0.1, height=0.1, sides=36, rx=90, ry=0, rz=0)
 #light_shape.position(0, 0, 1.5)
 #light_shape.set_draw_details(matsh, [shapeimg], 1.0, 0.1)
 #light_shape.set_material((100, 0, 0, 0.5))
 #light_shape.set_alpha(0.1)
 
-roll_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
-roll_string.translate(1.2, 0.5, 1)
-roll_string.set_shader(flatsh)
+#roll_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
+#roll_string.translate(1.2, 0.5, 1)
+#roll_string.set_shader(flatsh)
 
-pitch_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
-pitch_string.translate(1.2, 0.7, 1)
-pitch_string.set_shader(flatsh)
+#pitch_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
+#pitch_string.translate(1.2, 0.7, 1)
+#pitch_string.set_shader(flatsh)
 
 mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 123456789")
 mystring.translate(0.0, 0.0, 2)
 mystring.set_shader(flatsh)
 
+print("start creating digits")
 digit = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=50, y=50, default="1", size = 0.15)
 digit2 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=70, y=50, default="1", size = 0.15)
 digit3 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=90, y=50, default="1", size = 0.15)
+print("finished creating digits")
 
 tick = 0
 av_fps = fps
@@ -167,27 +179,27 @@ while DISPLAY.loop_running():
 #  bar_text.rotateToX(0)
 #  center_bars.rotateToX(0)
 
-  if(hud_update_frame == 0):
-      tmpstr = "%01d" % pitch
-      pitch_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
-      pitch_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.35, 1)
-      pitch_string.set_shader(flatsh)
+ # if(hud_update_frame == 0):
+ #     tmpstr = "%01d" % pitch
+ #     pitch_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
+ #     pitch_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.35, 1)
+ #     pitch_string.set_shader(flatsh)
     
-      tmpstr = "%01d" % roll
-      roll_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
-      roll_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.25, 1)
-      roll_string.set_shader(flatsh)
+ #     tmpstr = "%01d" % roll
+ #     roll_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
+ #     roll_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.25, 1)
+ #     roll_string.set_shader(flatsh)
 
   tmpstr = "%03d" % pitch
-  digit.set_digit(tmpstr[0])
-  digit2.set_digit(tmpstr[1])
-  digit3.set_digit(tmpstr[2])
+#  digit.set_digit(tmpstr[0])
+#  digit2.set_digit(tmpstr[1])
+#  digit3.set_digit(tmpstr[2])
 
-  pitch_string.draw()
-  roll_string.draw()
-  digit.draw()
-  digit2.draw()
-  digit3.draw()
+#  pitch_string.draw()
+#  roll_string.draw()
+#  digit.draw()
+#  digit2.draw()
+#  digit3.draw()
 #  mystring.draw()   # just to make the ladder text appear???
 
 #  light_shape.draw()
