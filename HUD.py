@@ -7,6 +7,7 @@ import math, random, time, glob
 
 import demo
 import pi3d
+import numeric
 
 print("=====================================================")
 print("press escape to escape")
@@ -29,7 +30,7 @@ roll_rate = 5
 
 hud_update_frames = 4
 
-fps = 20
+fps = 25
 
 # Setup display and initialise pi3d
 DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
@@ -131,6 +132,10 @@ mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 12345
 mystring.translate(0.0, 0.0, 2)
 mystring.set_shader(flatsh)
 
+digit = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=50, y=50, default="1", size = 0.15)
+digit2 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=70, y=50, default="1", size = 0.15)
+digit3 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=90, y=50, default="1", size = 0.15)
+
 tick = 0
 av_fps = fps
 #i_n=0
@@ -173,8 +178,16 @@ while DISPLAY.loop_running():
       roll_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.25, 1)
       roll_string.set_shader(flatsh)
 
+  tmpstr = "%03d" % pitch
+  digit.set_digit(tmpstr[0])
+  digit2.set_digit(tmpstr[1])
+  digit3.set_digit(tmpstr[2])
+
   pitch_string.draw()
   roll_string.draw()
+  digit.draw()
+  digit2.draw()
+  digit3.draw()
 #  mystring.draw()   # just to make the ladder text appear???
 
 #  light_shape.draw()
