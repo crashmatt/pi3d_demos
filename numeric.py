@@ -35,9 +35,9 @@ class FastNumber(object):
     def set_number(self, text):
         pos = 0
         textlen = len(text) 
-#        for i in xrange(0,self.num_digits-textlen):
-#            self.digits[pos].set_digit(" ")
-#           pos += 1
+        for i in xrange(0,self.num_digits-textlen):
+            self.digits[pos].set_digit(" ")
+            pos += 1
             
         pos =  self.num_digits-textlen
 #No check for excess text length       
@@ -95,12 +95,13 @@ class FastDigit(object):
     def draw_digit(self):
         if(self.digit[1] is not None):
             self.digit[1].draw()
-               
+            
     def set_digit(self,numchar):
         if(numchar != self.digit[0]):
-            try:
+            num = ord(numchar)
+            if(num >= ord('0')) and (num <= ord('9')):
                 self.digit = self.digits[int(numchar)]
-            except:
+            else:
                 if(numchar == '-'):
                     self.digit = self.neg
                 elif(numchar == '.'):

@@ -26,9 +26,19 @@ ladder_length = 1.5
 pitch = 0
 roll = 0
 pitch_rate = 20
-roll_rate = 0
+roll_rate = 12
+heading_rate = 1
+track_rate = 1
+track = -5
+airspeed = 121
+groundspeed = 110
+windspeed = 15
+
+heading = 121
+vertical_speed = -312
 
 hud_update_frames = 4
+hud_text_spacing = 16
 
 fps = 25
 
@@ -51,7 +61,7 @@ flatsh = pi3d.Shader("uv_flat")
 #textsh = pi3d.Shader("uv_flat")
 
 #Create textures
-shapeimg = pi3d.Texture("textures/straw1.jpg")
+#shapeimg = pi3d.Texture("textures/straw1.jpg")
 
 print("start creating fonts")
 #fonts
@@ -121,13 +131,17 @@ bar_text.set_alpha(0.1)
 
 print("end creating ladder")
 
-#mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 123456789")
-#mystring.translate(0.0, 0.0, 2)
-#mystring.set_shader(flatsh)
 
 print("start creating digits")
-pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=0, size=0.15, spacing=15)
-roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=50, size=0.15, spacing=15)
+pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.15, spacing=hud_text_spacing)
+roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.15, spacing=hud_text_spacing)
+heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.15, spacing=hud_text_spacing)
+track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.15, spacing=hud_text_spacing)
+airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.15, spacing=hud_text_spacing)
+groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-100, size=0.15, spacing=hud_text_spacing)
+windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=180, y=-150, size=0.15, spacing=hud_text_spacing)
+vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.15, spacing=hud_text_spacing)
+
 print("finished creating digits")
 
 tick = 0
@@ -150,11 +164,25 @@ while DISPLAY.loop_running():
   fpv_camera.rotate(0,0,roll)
   fpv_camera.rotate(pitch,0,0)
 
-  pitch_text.set_number("%01.1f" % pitch)
-  roll_text.set_number("%01.1f" % roll)
+  pitch_text.set_number("%01d" % pitch)
+  roll_text.set_number("%01d" % roll)
+  
+  heading_text.set_number("%01d" % heading)
+  track_text.set_number("%01d" % track)
+  airspeed_text.set_number("%01d" % airspeed)
+  windspeed_text.set_number("%01d" % windspeed)
+  groundspeed_text.set_number("%01d" % groundspeed)
+  vertical_speed_text.set_number("%01d" % vertical_speed)
 
   pitch_text.draw()
   roll_text.draw()
+  
+  heading_text.draw()
+  track_text.draw()
+  airspeed_text.draw()
+  windspeed_text.draw()
+  groundspeed_text.draw()
+  vertical_speed_text.draw()
 
 #  light_shape.draw()
   bar_text.draw()
