@@ -17,7 +17,7 @@ print("=====================================================")
 
 bar_dist = 5
 ladder_step = 15
-ladder_thickness = 0.01#0.006
+ladder_thickness = 0.01
 ladder_zero_thickness = 0.02
 ladder_text_xpos = 1.0
 ladder_text_size = 0.004
@@ -26,7 +26,7 @@ ladder_length = 1.5
 pitch = 0
 roll = 0
 pitch_rate = 20
-roll_rate = 5
+roll_rate = 0
 
 hud_update_frames = 4
 
@@ -57,8 +57,6 @@ print("start creating fonts")
 #fonts
 hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))
 
-#ladderFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))
-#textFont = pi3d.Font("fonts/FreeSans.ttf", color=(128,255,128,255))
 ladderFont = hudFont
 textFont = hudFont
 
@@ -123,29 +121,13 @@ bar_text.set_alpha(0.1)
 
 print("end creating ladder")
 
-
-#light_shape = pi3d.Cylinder(camera=fpv_camera, radius=0.1, height=0.1, sides=36, rx=90, ry=0, rz=0)
-#light_shape.position(0, 0, 1.5)
-#light_shape.set_draw_details(matsh, [shapeimg], 1.0, 0.1)
-#light_shape.set_material((100, 0, 0, 0.5))
-#light_shape.set_alpha(0.1)
-
-#roll_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
-#roll_string.translate(1.2, 0.5, 1)
-#roll_string.set_shader(flatsh)
-
-#pitch_string = pi3d.String(camera=text_camera, font=textFont, string="0000", is_3d=False)
-#pitch_string.translate(1.2, 0.7, 1)
-#pitch_string.set_shader(flatsh)
-
-mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 123456789")
-mystring.translate(0.0, 0.0, 2)
-mystring.set_shader(flatsh)
+#mystring = pi3d.String(camera=hud_camera, font=hudFont, string="HUD TEST - 123456789")
+#mystring.translate(0.0, 0.0, 2)
+#mystring.set_shader(flatsh)
 
 print("start creating digits")
-digit = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=50, y=50, default="1", size = 0.15)
-digit2 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=70, y=50, default="1", size = 0.15)
-digit3 = numeric.FastDigit(camera=text_camera, font=textFont, shader=flatsh, x=90, y=50, default="1", size = 0.15)
+pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=0, size=0.15, spacing=15)
+roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=50, size=0.15, spacing=15)
 print("finished creating digits")
 
 tick = 0
@@ -161,46 +143,18 @@ fr = 0
 hud_update_frame = 0
 timestamp = time.clock()
 
-
 # Display scene and rotate shape
 while DISPLAY.loop_running():
-
-#  text_camera.reset(is_3d=True)
-  hud_camera.reset(is_3d=True)
   fpv_camera.reset(is_3d=True)
-#  text_camera.reset(is_3d=False)
   
   fpv_camera.rotate(0,0,roll)
   fpv_camera.rotate(pitch,0,0)
-  
-#  upper_bars.rotateToZ(0) 
-#  lower_bars.rotateToZ(0) 
-#  light_shape.rotateToZ(0) 
-#  bar_text.rotateToX(0)
-#  center_bars.rotateToX(0)
 
- # if(hud_update_frame == 0):
- #     tmpstr = "%01d" % pitch
- #     pitch_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
- #     pitch_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.35, 1)
- #     pitch_string.set_shader(flatsh)
-    
- #     tmpstr = "%01d" % roll
- #     roll_string = pi3d.String(camera=text_camera, font=textFont, string=tmpstr, is_3d=False, z=1, size=0.15)
- #     roll_string.translate(DISPLAY.width*0.35, DISPLAY.height*0.25, 1)
- #     roll_string.set_shader(flatsh)
+  pitch_text.set_number("%01.1f" % pitch)
+  roll_text.set_number("%01.1f" % roll)
 
-  tmpstr = "%03d" % pitch
-#  digit.set_digit(tmpstr[0])
-#  digit2.set_digit(tmpstr[1])
-#  digit3.set_digit(tmpstr[2])
-
-#  pitch_string.draw()
-#  roll_string.draw()
-#  digit.draw()
-#  digit2.draw()
-#  digit3.draw()
-#  mystring.draw()   # just to make the ladder text appear???
+  pitch_text.draw()
+  roll_text.draw()
 
 #  light_shape.draw()
   bar_text.draw()
@@ -229,14 +183,16 @@ while DISPLAY.loop_running():
       pitch -= 360
   elif(pitch < -360):
       pitch += 360
+  if(roll > 360):
+      roll -= 360
+  elif(roll < -360):
+      roll += 360
 
   #pi3d.screenshot("/media/E856-DA25/New/fr%03d.jpg" % fr)
   #fr += 1
 
   k = mykeys.read()
-  if k==112:
-    pi3d.screenshot("water1.jpg")
-  elif k==27:
+  if k==27:
     mykeys.close()
     DISPLAY.destroy()
     break
