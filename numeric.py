@@ -5,6 +5,9 @@ Created on 4 Jul 2014
 '''
 import pi3d
 
+#import sys.path(1, '/home/pi/pi3d/pi3d/pi3d.py')
+#sys.path.insert(1, '/home/pi/pi3d/pi3d')
+
 
 class FastNumber(object):
 
@@ -94,7 +97,8 @@ class FastDigit(object):
         
     def draw_digit(self):
         if(self.digit[1] is not None):
-            self.digit[1].draw()
+#            self.digit[1].draw()
+            self.digit[1].fast_draw()
             
     def set_digit(self,numchar):
         if(numchar != self.digit[0]):

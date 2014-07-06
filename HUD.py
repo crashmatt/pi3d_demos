@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import math, random, time, glob
 
-import demo
+#import demo
 import pi3d
 import numeric
 
@@ -29,12 +29,12 @@ pitch_rate = 20
 roll_rate = 12
 heading_rate = 1
 track_rate = 1
-track = -5
+track = 325
 airspeed = 121
 groundspeed = 110
 windspeed = 15
 
-heading = 121
+heading = 221
 vertical_speed = -312
 
 hud_update_frames = 4
