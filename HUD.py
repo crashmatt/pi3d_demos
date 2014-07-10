@@ -7,6 +7,7 @@ import math, random, time, glob
 
 #import demo
 import pi3d
+
 import numeric
 
 print("=====================================================")
@@ -50,7 +51,17 @@ fpv_camera = pi3d.Camera.instance()
 hud_camera = pi3d.Camera()
 text_camera = pi3d.Camera(is_3d=False)
 
+
+
 #setup textures, light position and initial model position
+
+##########################################
+# Load textures
+#patimg = pi3d.Texture("textures/PATRN.PNG")
+coffimg = pi3d.Texture("textures/COFFEE.PNG")
+#shapebump = pi3d.Texture("textures/floor_nm.jpg")
+#shapeshine = pi3d.Texture("textures/stars.jpg")
+
 #pi3d.Light((5, -5, 8))
 fpv_light = pi3d.Light((0, 0, 1))
 
@@ -59,6 +70,19 @@ fpv_light = pi3d.Light((0, 0, 1))
 matsh = pi3d.Shader("mat_flat")  #For fixed color
 flatsh = pi3d.Shader("uv_flat")
 #textsh = pi3d.Shader("uv_flat")
+
+#Create text layer
+#textlayer = pi3d.PostProcess(shader="uv_flat", camera=text_camera,  scale=1)
+textlayer = pi3d.Layer(file=None, camera=hud_camera, shader=flatsh)
+
+myPlane = pi3d.Plane(w=4, h=4, name="plane", z=6)
+#myPlane = pi3d.Plane(camera=hud_camera, w=4, h=4, name="plane", z=6)
+
+mySprite = pi3d.LodSprite(z=10.0, w=400, h=300)  #, n=divide z=20
+mySprite.set_2d_size(w=200, h=200)
+mySprite.set_material((0,0,0,0))
+mySprite.set_alpha(0.5)
+
 
 #Create textures
 #shapeimg = pi3d.Texture("textures/straw1.jpg")
@@ -138,8 +162,8 @@ roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh,
 heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.15, spacing=hud_text_spacing)
 track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.15, spacing=hud_text_spacing)
 airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.15, spacing=hud_text_spacing)
-groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-100, size=0.15, spacing=hud_text_spacing)
-windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=180, y=-150, size=0.15, spacing=hud_text_spacing)
+groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=-30, y=-30, size=0.15, spacing=hud_text_spacing)
+windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=0, y=0, size=0.15, spacing=hud_text_spacing)
 vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.15, spacing=hud_text_spacing)
 
 print("finished creating digits")
@@ -157,6 +181,11 @@ fr = 0
 hud_update_frame = 0
 timestamp = time.clock()
 
+#textbox.position(0, 0, 0)
+#textbox.set_draw_details(flatsh, [textlayer,textlayer,textlayer], 1.0, 0.1)
+#textbox.set_material((0, 0, 0, 1.0))
+#textlayer.set_alpha(0.1)
+
 # Display scene and rotate shape
 while DISPLAY.loop_running():
   fpv_camera.reset(is_3d=True)
@@ -164,31 +193,39 @@ while DISPLAY.loop_running():
   fpv_camera.rotate(0,0,roll)
   fpv_camera.rotate(pitch,0,0)
 
-  pitch_text.set_number("%01d" % pitch)
-  roll_text.set_number("%01d" % roll)
-  
-  heading_text.set_number("%01d" % heading)
-  track_text.set_number("%01d" % track)
-  airspeed_text.set_number("%01d" % airspeed)
-  windspeed_text.set_number("%01d" % windspeed)
-  groundspeed_text.set_number("%01d" % groundspeed)
-  vertical_speed_text.set_number("%01d" % vertical_speed)
+  if(hud_update_frame == 0):
+      pitch_text.set_number("%01d" % pitch)
+      roll_text.set_number("%01d" % roll)
+      
+      heading_text.set_number("%01d" % heading)
+      track_text.set_number("%01d" % track)
+      airspeed_text.set_number("%01d" % airspeed)
+      windspeed_text.set_number("%01d" % av_fps)
+      groundspeed_text.set_number("%01d" % groundspeed)
+      vertical_speed_text.set_number("%01d" % vertical_speed)
+      
+      textlayer.start_layer()               # Draw on the text layer
+      pitch_text.draw()
+      roll_text.draw()
+      heading_text.draw()
+      track_text.draw()
+      airspeed_text.draw()
+      windspeed_text.draw()
+      groundspeed_text.draw()
+      vertical_speed_text.draw()
+      textlayer.end_layer()                 # stop drawing on the text layer
 
-  pitch_text.draw()
-  roll_text.draw()
-  
-  heading_text.draw()
-  track_text.draw()
-  airspeed_text.draw()
-  windspeed_text.draw()
-  groundspeed_text.draw()
-  vertical_speed_text.draw()
-
-#  light_shape.draw()
-  bar_text.draw()
+  # try glScissor for limiting extent of ladder drawing
+#  bar_text.draw()
   upper_bars.draw()
   lower_bars.draw()
   center_bars.draw()
+
+#  textlayer.draw_layer()
+
+#  myPlane.draw(flatsh, [coffimg], camera=hud_camera)
+  myPlane.draw(flatsh, [textlayer], camera=hud_camera)
+#  mySprite.draw(flatsh, [textlayer], camera=text_camera)
 
 
   if time.time() > next_time:
@@ -222,6 +259,7 @@ while DISPLAY.loop_running():
   k = mykeys.read()
   if k==27:
     mykeys.close()
+    textlayer.delete_buffers()
     DISPLAY.destroy()
     break
 
