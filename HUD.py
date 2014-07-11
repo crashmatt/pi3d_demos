@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-
+from pi3d.util.OffScreenTexture import OffScreenTexture
 
 import math, random, time, glob
 
@@ -9,6 +9,7 @@ import math, random, time, glob
 import pi3d
 
 import numeric
+from HUDladder import HUDladder
 
 print("=====================================================")
 print("press escape to escape")
@@ -48,9 +49,8 @@ DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
 DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
 
 fpv_camera = pi3d.Camera.instance()
-hud_camera = pi3d.Camera()
+#hud_camera = pi3d.Camera()
 text_camera = pi3d.Camera(is_3d=False)
-
 
 
 #setup textures, light position and initial model position
@@ -65,12 +65,11 @@ flatsh = pi3d.Shader("uv_flat")
 #Create text layer
 textlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
 
-
 #Create textures
 
 print("start creating fonts")
 #fonts
-hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,200,50,255))
+hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
 
 ladderFont = hudFont
 textFont = hudFont
@@ -79,6 +78,11 @@ print("end creating fonts")
 
 
 print("start creating ladder")
+
+#ladderlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
+
+ladder = HUDladder(font=hudFont, camera=text_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
+
 #build the bar shapes
 upper_bars = pi3d.MergeShape(camera = fpv_camera)
 lower_bars = pi3d.MergeShape(camera = fpv_camera)
@@ -138,6 +142,7 @@ print("end creating ladder")
 
 
 print("start creating digits")
+
 pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.15, spacing=hud_text_spacing)
 roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.15, spacing=hud_text_spacing)
 heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.15, spacing=hud_text_spacing)
@@ -157,10 +162,12 @@ next_time = time.time() + spf
 
 # Fetch key presses.
 mykeys = pi3d.Keyboard()
-fr = 0
+#fr = 0
 
 hud_update_frame = 0
 timestamp = time.clock()
+
+frameCount = 0
 
 # Display scene and rotate shape
 while DISPLAY.loop_running():
@@ -189,15 +196,27 @@ while DISPLAY.loop_running():
       windspeed_text.draw()
       groundspeed_text.draw()
       vertical_speed_text.draw()
-      textlayer.end_layer()                 # stop drawing on the text layer
+      textlayer.end_layer()                 # stop drawing on the text layer    
 
+      ladder.gen_ladder()
+      
   # try glScissor for limiting extent of ladder drawing
 #  bar_text.draw()
-  upper_bars.draw()
-  lower_bars.draw()
-  center_bars.draw()
+#  upper_bars.draw()
+#  lower_bars.draw()
+#  center_bars.draw()
+
+#  ladderlayer.draw_layer()
+#  ladder.draw_ladder()
+  ladder.draw_ladder()
+#      ladderlayer.start_layer()
+#      flbar_shape.draw()
+#      myStr.draw()
+#      ladderlayer.end_layer()
+
 
   textlayer.draw_layer()
+  
 
   if time.time() > next_time:
     next_time = time.time() + spf
@@ -225,7 +244,7 @@ while DISPLAY.loop_running():
       roll += 360
 
   #pi3d.screenshot("/media/E856-DA25/New/fr%03d.jpg" % fr)
-  #fr += 1
+  frameCount += 1
 
   k = mykeys.read()
   if k==27:
