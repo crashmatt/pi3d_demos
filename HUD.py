@@ -26,8 +26,8 @@ ladder_length = 1.5
 
 pitch = 0
 roll = 0
-pitch_rate = 20
-roll_rate = 12
+pitch_rate = 5
+roll_rate = 3
 heading_rate = 1
 track_rate = 1
 track = 325
@@ -45,7 +45,7 @@ fps = 25
 
 # Setup display and initialise pi3d
 DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
-DISPLAY.set_background(0.0, 0.0, 0.0, 1)      # r,g,b,alpha
+DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
 
 fpv_camera = pi3d.Camera.instance()
 hud_camera = pi3d.Camera()
@@ -55,37 +55,18 @@ text_camera = pi3d.Camera(is_3d=False)
 
 #setup textures, light position and initial model position
 
-##########################################
-# Load textures
-#patimg = pi3d.Texture("textures/PATRN.PNG")
-coffimg = pi3d.Texture("textures/COFFEE.PNG")
-#shapebump = pi3d.Texture("textures/floor_nm.jpg")
-#shapeshine = pi3d.Texture("textures/stars.jpg")
-
-#pi3d.Light((5, -5, 8))
 fpv_light = pi3d.Light((0, 0, 1))
 
 #create shaders
 #shader = pi3d.Shader("uv_reflect")
 matsh = pi3d.Shader("mat_flat")  #For fixed color
 flatsh = pi3d.Shader("uv_flat")
-#textsh = pi3d.Shader("uv_flat")
 
 #Create text layer
-#textlayer = pi3d.PostProcess(shader="uv_flat", camera=text_camera,  scale=1)
-textlayer = pi3d.Layer(file=None, camera=hud_camera, shader=flatsh)
-
-myPlane = pi3d.Plane(w=4, h=4, name="plane", z=6)
-#myPlane = pi3d.Plane(camera=hud_camera, w=4, h=4, name="plane", z=6)
-
-mySprite = pi3d.LodSprite(z=10.0, w=400, h=300)  #, n=divide z=20
-mySprite.set_2d_size(w=200, h=200)
-mySprite.set_material((0,0,0,0))
-mySprite.set_alpha(0.5)
+textlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
 
 
 #Create textures
-#shapeimg = pi3d.Texture("textures/straw1.jpg")
 
 print("start creating fonts")
 #fonts
@@ -150,7 +131,7 @@ center_bars.set_alpha(1)
 
 bar_text.position(0.0, 0.0, 0)
 bar_text.set_draw_details(flatsh, [], 1.0, 0.1)
-#bar_text.set_material((100, 0, 0, 0.5))
+bar_text.set_material((50, 200, 50, 1.0))
 bar_text.set_alpha(0.1)
 
 print("end creating ladder")
@@ -180,11 +161,6 @@ fr = 0
 
 hud_update_frame = 0
 timestamp = time.clock()
-
-#textbox.position(0, 0, 0)
-#textbox.set_draw_details(flatsh, [textlayer,textlayer,textlayer], 1.0, 0.1)
-#textbox.set_material((0, 0, 0, 1.0))
-#textlayer.set_alpha(0.1)
 
 # Display scene and rotate shape
 while DISPLAY.loop_running():
@@ -221,12 +197,7 @@ while DISPLAY.loop_running():
   lower_bars.draw()
   center_bars.draw()
 
-#  textlayer.draw_layer()
-
-#  myPlane.draw(flatsh, [coffimg], camera=hud_camera)
-  myPlane.draw(flatsh, [textlayer], camera=hud_camera)
-#  mySprite.draw(flatsh, [textlayer], camera=text_camera)
-
+  textlayer.draw_layer()
 
   if time.time() > next_time:
     next_time = time.time() + spf
