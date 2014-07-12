@@ -79,8 +79,6 @@ print("end creating fonts")
 
 print("start creating ladder")
 
-#ladderlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
-
 ladder = HUDladder(font=hudFont, camera=text_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
 
 #build the bar shapes
