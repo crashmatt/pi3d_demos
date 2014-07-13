@@ -204,18 +204,10 @@ while DISPLAY.loop_running():
 #  lower_bars.draw()
 #  center_bars.draw()
 
-#  ladderlayer.draw_layer()
-#  ladder.draw_ladder()
   ladder.draw_ladder()
-#      ladderlayer.start_layer()
-#      flbar_shape.draw()
-#      myStr.draw()
-#      ladderlayer.end_layer()
-
 
   textlayer.draw_layer()
   
-
   if time.time() > next_time:
     next_time = time.time() + spf
     av_fps = av_fps*0.9 + tick/spf*0.1 # exp smooth moving average
