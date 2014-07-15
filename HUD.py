@@ -51,7 +51,7 @@ DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
 fpv_camera = pi3d.Camera.instance()
 #hud_camera = pi3d.Camera()
 text_camera = pi3d.Camera(is_3d=False)
-
+hud_camera = text_camera
 
 #setup textures, light position and initial model position
 
@@ -79,7 +79,7 @@ print("end creating fonts")
 
 print("start creating ladder")
 
-ladder = HUDladder(font=hudFont, camera=text_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
+ladder = HUDladder(font=hudFont, camera=hud_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
 
 #build the bar shapes
 upper_bars = pi3d.MergeShape(camera = fpv_camera)
@@ -211,7 +211,7 @@ while DISPLAY.loop_running():
   if time.time() > next_time:
     next_time = time.time() + spf
     av_fps = av_fps*0.9 + tick/spf*0.1 # exp smooth moving average
-    print(av_fps, " FPS, ", pitch, " pitch")
+#    print(av_fps, " FPS, ", pitch, " pitch")
     tick = 0
     
   tick += 1
