@@ -18,7 +18,6 @@ class HUDladderBar(object):
         self.pixel_height = int(scrnheight * Display.INSTANCE.height)
         self.pixel_width = Display.INSTANCE.width
 
-
         self.camera = camera
         self.shader = shader
                 
@@ -26,11 +25,6 @@ class HUDladderBar(object):
         self.bar = OffScreenTexture("bar", h=self.pixel_height)
 
         # need to do offscreentexture first so its size can be used for the following.
-#        self.height3d = float(self.pixel_height) / float(Display.INSTANCE.height)
-#        self.width3d = float(self.bar.iy) / float(Display.INSTANCE.width)
-        self.height3d = 0.4
-        self.width3d = 0.03
-        
         self.xoffset = int((self.bar.ix - Display.INSTANCE.width) * 0.5)
         self.yoffset = int((self.bar.iy - Display.INSTANCE.height) * 0.5)
 
@@ -78,12 +72,13 @@ class HUDladderBar(object):
         self.bar._end()
 #        self.bar.end_layer()
 
-    def draw_bar(self, camera=None):
+    def draw_bar(self, camera=None, alpha=1):
 #        self.bar.draw_layer()
 #        self.sprite.draw(self.shader, [self.bar])
         if camera == None:
             camera = self.camera
 
+        self.sprite.set_alpha(alpha)
         self.sprite.draw(self.shader, [self.bar], camera = camera)
 
 
@@ -118,9 +113,6 @@ class HUDladder(object):
         self.alpha = 1.0                # 0 to 1
         self.maxDegrees = 80
         
-        self.upper_ladder = None
-        self.lower_ladder = None
-        self.center_ladder = None
 
         # 2d camera for generating sprites
         self.camera = camera    #pi3d.Camera(is_3d=False)
@@ -155,20 +147,15 @@ class HUDladder(object):
 
     def _gen_ladder(self):
         """ Generate the ladder in OffScreenTexture and Sprite """        
-        self.bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
-        self.bar.draw_bar()
-        self.bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
+#        self.bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
+#        self.bar.draw_bar()
+#        self.bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
 
         for bar in self.bars:
-            bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
+#            bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
             bar.draw_bar()
             bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
-            
-#        for bar in self.bars:
-#            bar.draw_bar()
-
-#        self.bar.generate_bar(font=self.font, shaders = [self.flatsh, self.matsh])
-        
+                    
         
     def gen_ladder(self):
         if self.inits_done < 1:
@@ -185,7 +172,7 @@ class HUDladder(object):
             self.camera2d.rotateZ(25)
 #            self.bar.draw_bar(self.camera2d)
             for bar in self.bars:
-                bar.draw_bar(self.camera2d)
+                bar.draw_bar(self.camera2d, alpha=1)
             
 #            self.camera2d.reset()
 #
