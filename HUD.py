@@ -27,7 +27,7 @@ ladder_length = 1.5
 
 pitch = 0
 roll = 0
-pitch_rate = 5
+pitch_rate = 10
 roll_rate = 3
 heading_rate = 1
 track_rate = 1
