@@ -102,8 +102,8 @@ class HUDladder(object):
         self.heading = 0
         self.track = 0
         
-        self.degstep = 15
-        self.screenstep = 0.2           # ratio of screen height
+        self.degstep = 10
+        self.screenstep = 0.4           # ratio of screen height
         self.bar_thickness = 1          # pixels
         self.zero_bar_thickness = 2     # pixels
         self.bar_width = 0.3            # ratio of screen width
@@ -134,13 +134,13 @@ class HUDladder(object):
         self.bar_pixel_height = int(Display.INSTANCE.height * 0.1)
 
         self.bars = []
-        for i in xrange(-2,3):     #(-self.bar_count,self.bar_count):
+        for i in xrange(-self.bar_count,self.bar_count+1):     #(-self.bar_count,self.bar_count):
             degstep = i * self.degstep
             bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep))
             self.bars.append(bar)
 
 #        self.bar = pi3d.Layer(camera=camera, shader=shader, z=4.8, flip=True)
-        self.bar = HUDladderBar(self.camera, self.shader, 1, ypos=0 )
+#        self.bar = HUDladderBar(self.camera, self.shader, 1, ypos=0 )
 
         self.inits_done = 0
         
@@ -163,16 +163,23 @@ class HUDladder(object):
             self.inits_done += 1
         
        
-    def draw_ladder(self):
+    def draw_ladder(self, roll, pitch, yaw):
+        """ Draw the ladder. roll, pitch, yaw parameters in degrees"""
         if self.inits_done > 0:
             pos=0
             rot = 0
+            ypos = pitch * self.pixelsPerBar / self.degstep
+            pitchrange = self.degstep * 0.5 / self.screenstep
+            lowpitch = pitch - pitchrange 
+            highpitch = pitch + pitchrange
+            
             self.camera2d.reset()
-            self.camera2d.position((0,5,0))
-            self.camera2d.rotateZ(25)
+            self.camera2d.rotateZ(roll)
+            self.camera2d.position((0,ypos,0))
 #            self.bar.draw_bar(self.camera2d)
             for bar in self.bars:
-                bar.draw_bar(self.camera2d, alpha=1)
+                if(bar.degree < highpitch) and (bar.degree > lowpitch):
+                    bar.draw_bar(self.camera2d, alpha=1)
             
 #            self.camera2d.reset()
 #

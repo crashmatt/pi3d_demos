@@ -204,7 +204,7 @@ while DISPLAY.loop_running():
 #  lower_bars.draw()
 #  center_bars.draw()
 
-  ladder.draw_ladder()
+  ladder.draw_ladder(roll, pitch, 0)
 
   textlayer.draw_layer()
   
@@ -224,8 +224,8 @@ while DISPLAY.loop_running():
       hud_update_frame = 0
   
   # Temporary
-  if(pitch > 360):
-      pitch -= 360
+  if(pitch > 70):
+      pitch -= 140
   elif(pitch < -360):
       pitch += 360
   if(roll > 360):
