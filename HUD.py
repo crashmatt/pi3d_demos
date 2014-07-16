@@ -49,7 +49,6 @@ DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
 DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
 
 fpv_camera = pi3d.Camera.instance()
-#hud_camera = pi3d.Camera()
 text_camera = pi3d.Camera(is_3d=False)
 hud_camera = text_camera
 
@@ -62,8 +61,8 @@ fpv_light = pi3d.Light((0, 0, 1))
 matsh = pi3d.Shader("mat_flat")  #For fixed color
 flatsh = pi3d.Shader("uv_flat")
 
-#Create text layer
-textlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
+#Create layers
+hudlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
 
 #Create textures
 
@@ -81,65 +80,12 @@ print("start creating ladder")
 
 ladder = HUDladder(font=hudFont, camera=hud_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
 
-#build the bar shapes
-upper_bars = pi3d.MergeShape(camera = fpv_camera)
-lower_bars = pi3d.MergeShape(camera = fpv_camera)
-center_bars = pi3d.MergeShape(camera = fpv_camera)
-bar_text = pi3d.MergeShape(camera = fpv_camera)
-
-#acylinder = pi3d.Cylinder(camera=fpv_camera, radius=ladder_thickness, height=ladder_length, sides=ladder_sides)
-bar_shape = pi3d.Plane(camera=fpv_camera,  w=ladder_length, h=ladder_thickness)
-
-bar_steps = int(180 / ladder_step)
-
-for step in xrange(1, bar_steps):
-   angle = step*ladder_step
-   ypos = bar_dist * math.sin(math.radians(angle))
-   zpos = bar_dist * math.cos(math.radians(angle))
-   
-   upper_bars.add(bar_shape, x=0, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
-   lower_bars.add(bar_shape, x=0, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
-   
-   num_str = "%01d" % angle
-   ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
-   bar_text.add(ladder_str, x=ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
-   bar_text.add(ladder_str, x=-ladder_text_xpos, y=ypos, z=zpos, rx=-angle, ry=0, rz=0)
-
-   num_str = "%01d" % -angle
-   ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string=num_str, sx=ladder_text_size, sy=ladder_text_size)
-   bar_text.add(ladder_str, x=ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
-   bar_text.add(ladder_str, x=-ladder_text_xpos, y=-ypos, z=zpos, rx=angle, ry=0, rz=0)
-
-center_bars.add(bar_shape, x=0, y=0, z=bar_dist, rx=0, ry=0, rz=0)
-ladder_str = pi3d.String(camera=fpv_camera, font=ladderFont, string="0", sx=ladder_text_size, sy=ladder_text_size)
-bar_text.add(ladder_str, x=ladder_text_xpos, y=0, z=bar_dist, rx=0, ry=0, rz=0)
-bar_text.add(ladder_str, x=-ladder_text_xpos, y=0, z=bar_dist, rx=0, ry=0, rz=0)
-
-
-upper_bars.position(0.0, 0.0, 0)
-upper_bars.set_draw_details(matsh, [], 1.0, 0.1)
-upper_bars.set_material((0, 100, 0, 0.5))
-upper_bars.set_alpha(0.5)
-
-lower_bars.position(0.0, 0.0, 0)
-lower_bars.set_draw_details(matsh, [], 1.0, 0.1)
-lower_bars.set_material((100, 0, 0, 0.5))
-lower_bars.set_alpha(0.1)
-
-center_bars.position(0, 0, 0)
-center_bars.set_draw_details(matsh, [], 1.0, 0.1)
-center_bars.set_material((128, 128, 128, 0.5))
-center_bars.set_alpha(1)
-
-bar_text.position(0.0, 0.0, 0)
-bar_text.set_draw_details(flatsh, [], 1.0, 0.1)
-bar_text.set_material((50, 200, 50, 1.0))
-bar_text.set_alpha(0.1)
-
 print("end creating ladder")
 
 
 print("start creating digits")
+
+#digitsmap = 
 
 pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.15, spacing=hud_text_spacing)
 roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.15, spacing=hud_text_spacing)
@@ -169,23 +115,20 @@ frameCount = 0
 
 # Display scene and rotate shape
 while DISPLAY.loop_running():
-  fpv_camera.reset(is_3d=True)
-  
-  fpv_camera.rotate(0,0,roll)
-  fpv_camera.rotate(pitch,0,0)
 
   if(hud_update_frame == 0):
       pitch_text.set_number("%01d" % pitch)
       roll_text.set_number("%01d" % roll)
-      
+  elif(hud_update_frame == 1):    
       heading_text.set_number("%01d" % heading)
       track_text.set_number("%01d" % track)
       airspeed_text.set_number("%01d" % airspeed)
+  elif(hud_update_frame == 2):
       windspeed_text.set_number("%01d" % av_fps)
       groundspeed_text.set_number("%01d" % groundspeed)
       vertical_speed_text.set_number("%01d" % vertical_speed)
       
-      textlayer.start_layer()               # Draw on the text layer
+      hudlayer.start_layer()               # Draw on the text layer
       pitch_text.draw()
       roll_text.draw()
       heading_text.draw()
@@ -194,19 +137,15 @@ while DISPLAY.loop_running():
       windspeed_text.draw()
       groundspeed_text.draw()
       vertical_speed_text.draw()
-      textlayer.end_layer()                 # stop drawing on the text layer    
+      hudlayer.end_layer()                 # stop drawing on the text layer    
 
       ladder.gen_ladder()
       
-  # try glScissor for limiting extent of ladder drawing
-#  bar_text.draw()
-#  upper_bars.draw()
-#  lower_bars.draw()
-#  center_bars.draw()
+# try glScissor for limiting extent of ladder drawing
 
   ladder.draw_ladder(roll, pitch, 0)
 
-  textlayer.draw_layer()
+  hudlayer.draw_layer()
   
   if time.time() > next_time:
     next_time = time.time() + spf
@@ -239,7 +178,7 @@ while DISPLAY.loop_running():
   k = mykeys.read()
   if k==27:
     mykeys.close()
-    textlayer.delete_buffers()
+    hudlayer.delete_buffers()
     DISPLAY.destroy()
     break
 

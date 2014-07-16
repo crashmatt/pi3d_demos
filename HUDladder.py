@@ -38,8 +38,9 @@ class HUDladderBar(object):
         else:
             return (255,0,0,255)
 
-    def get_font_colour(self):
-        return (50, 200, 50, 1.0)
+#    def get_font_colour(self):
+#        return (50, 200, 50, 1.0)
+#        return (200, 0, 0, 1.0)
 
     def generate_bar(self, font, shaders=[None], width=0.3, thickness = 2, bar_gap=0.05, font_bar_gap=0.07, strscale=0.6):
         """ *shaders* is array of [flatsh, matsh]    """
@@ -51,7 +52,7 @@ class HUDladderBar(object):
         self.font = font
         
         barcolour = self.get_bar_colour()
-        fontcolour = self.get_font_colour()
+#        fontcolour = self.get_font_colour()
 
         from pi3d.Display import Display
         bar_width = width * Display.INSTANCE.width
@@ -68,13 +69,13 @@ class HUDladderBar(object):
         degStr = pi3d.String(camera=self.camera, font=font, string=degText, sx=0.6, sy=0.6, justify='R')
         degStr.position(bar_width/2 + (font_bar_gap * self.pixel_width) + self.xoffset, self.yoffset,5)
         degStr.set_shader(flatsh)
-        degStr.set_material(fontcolour)
+#        degStr.set_material(fontcolour)
         degStr.draw()
     
         degStr = pi3d.String(camera=self.camera, font=font, string=degText, sx=0.6, sy=0.6, justify='C')
         degStr.position((-bar_width/2) - (font_bar_gap * self.pixel_width) + self.xoffset,  self.yoffset,5)
         degStr.set_shader(flatsh)
-        degStr.set_material(fontcolour)
+#        degStr.set_material(fontcolour)
         degStr.draw()
         
         self.bar._end()
@@ -125,7 +126,6 @@ class HUDladder(object):
         
         # camera for viewing the placed sprites. Owned byt the ladder since it moves
         self.camera2d = pi3d.Camera(is_3d = False)
-#        self.camera3d = pi3d.Camera()
         
         self.flatsh = shader    #pi3d.Shader("uv_flat")
         self.matsh = pi3d.Shader("mat_flat")
