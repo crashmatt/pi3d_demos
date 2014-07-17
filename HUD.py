@@ -17,6 +17,53 @@ print("move this terminal window to top of screen to see FPS")
 print("=====================================================")
 
 
+class hud_text():
+    def __init__(self, font, text, camera, hud=None, attr=None, shader=None, xpos=0, ypos=0, size=1.0):
+        from pi3d.Display import Display
+                
+        self.attr = attr
+        self.hud = hud
+        self.font = font
+        self.camera = camera
+        self.flatsh = shader
+        self.value = None
+        self.text = text
+        self.size = size
+        
+        self.x = xpos * Display.INSTANCE.height
+        self.y = ypos * Display.INSTANCE.width
+        
+        self.last_formatted_text = ""
+        self.changed = False
+        self.gen_text()
+
+    def gen_text(self):
+        if(self.attr != None) and (self.hud != None):
+            value = hud.getattr(self.hud, self.attr, None)
+        else:
+            value = None
+
+        #if value == None:
+        #    txt = self.text
+        #else:
+        #    txt = self.text % value
+        txt = self.text
+
+        if txt != self.last_formatted_text: #getattr(self, "last_formatted_text", ""):
+            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='R')
+            self.text.position(self.x, self.y, 5)
+            self.text.set_material((0,0,0,0))
+            self.text.set_shader(self.flatsh)
+            self.last_formatted_text = self.text
+            self.changed = True
+        
+        
+    def draw_text(self):
+        if self.text != None:
+            self.text.draw()
+            self.changed = False
+        
+
 bar_dist = 5
 ladder_step = 15
 ladder_thickness = 0.01
@@ -62,13 +109,16 @@ matsh = pi3d.Shader("mat_flat")  #For fixed color
 flatsh = pi3d.Shader("uv_flat")
 
 #Create layers
-hudlayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
+dataLayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
+statusLayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
 
 #Create textures
 
 print("start creating fonts")
 #fonts
-hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
+#hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
+hudFont = pi3d.Font("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", (50,255,50,220))
+
 
 ladderFont = hudFont
 textFont = hudFont
@@ -77,26 +127,33 @@ print("end creating fonts")
 
 
 print("start creating ladder")
+                  
+ladder = HUDladder(font=hudFont, camera=hud_camera, shader=flatsh)
 
-ladder = HUDladder(font=hudFont, camera=hud_camera, shader=flatsh) #(DISPLAY.width, DISPLAY.height)
 
 print("end creating ladder")
 
 
 print("start creating digits")
 
-#digitsmap = 
+#digitsmap =
 
-pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.15, spacing=hud_text_spacing)
-roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.15, spacing=hud_text_spacing)
-heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.15, spacing=hud_text_spacing)
-track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.15, spacing=hud_text_spacing)
-airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.15, spacing=hud_text_spacing)
-groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=-30, y=-30, size=0.15, spacing=hud_text_spacing)
-windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=0, y=0, size=0.15, spacing=hud_text_spacing)
-vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.15, spacing=hud_text_spacing)
+pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=hud_text_spacing)
+roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=hud_text_spacing)
+heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=hud_text_spacing)
+track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=hud_text_spacing)
+airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=hud_text_spacing)
+groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=hud_text_spacing)
+windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=hud_text_spacing)
+vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=hud_text_spacing)
 
 print("finished creating digits")
+
+statusText = []
+statusText.append( hud_text(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
+statusText.append( hud_text(hudFont, text="LABEL HERE", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.0, size=0.125) )
+statusText.append( hud_text(hudFont, text="LABEL THERE", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
+statusText.append( hud_text(hudFont, text="LABEL IT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
 
 tick = 0
 av_fps = fps
@@ -127,8 +184,8 @@ while DISPLAY.loop_running():
       windspeed_text.set_number("%01d" % av_fps)
       groundspeed_text.set_number("%01d" % groundspeed)
       vertical_speed_text.set_number("%01d" % vertical_speed)
-      
-      hudlayer.start_layer()               # Draw on the text layer
+  elif(hud_update_frame == 3):    
+      dataLayer.start_layer()               # Draw on the text layer
       pitch_text.draw()
       roll_text.draw()
       heading_text.draw()
@@ -137,7 +194,18 @@ while DISPLAY.loop_running():
       windspeed_text.draw()
       groundspeed_text.draw()
       vertical_speed_text.draw()
-      hudlayer.end_layer()                 # stop drawing on the text layer    
+      dataLayer.end_layer()                 # stop drawing on the text layer    
+
+      statuschange = False
+      for text in statusText:
+          text.gen_text()
+          if text.changed:
+              statuschange = True
+      if statuschange:
+          statusLayer.start_layer()
+          for text in statusText:
+              text.draw_text()
+          statusLayer.end_layer()
 
       ladder.gen_ladder()
       
@@ -145,7 +213,8 @@ while DISPLAY.loop_running():
 
   ladder.draw_ladder(roll, pitch, 0)
 
-  hudlayer.draw_layer()
+  dataLayer.draw_layer()
+  statusLayer.draw_layer()
   
   if time.time() > next_time:
     next_time = time.time() + spf
@@ -178,7 +247,7 @@ while DISPLAY.loop_running():
   k = mykeys.read()
   if k==27:
     mykeys.close()
-    hudlayer.delete_buffers()
+    dataLayer.delete_buffers()
     DISPLAY.destroy()
     break
 
