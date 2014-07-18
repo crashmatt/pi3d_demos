@@ -117,7 +117,7 @@ statusLayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
 print("start creating fonts")
 #fonts
 #hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
-hudFont = pi3d.Font("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", (50,255,50,220))
+hudFont = pi3d.Font("fonts/FreeSansBold.ttf", (50,255,50,220))   #usr/share/fonts/truetype/freefont/
 
 
 ladderFont = hudFont
