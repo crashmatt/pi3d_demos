@@ -3,13 +3,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from pi3d.util.OffScreenTexture import OffScreenTexture
 
-import math, random, time, glob
+import math, random, time, glob, string
 
 #import demo
 import pi3d
 
 import numeric
 from HUDladder import HUDladder
+from LayerItems import layer_text
+from LayerItems import layer_var_text
+from LayerItems import layer_items
 
 print("=====================================================")
 print("press escape to escape")
@@ -17,238 +20,238 @@ print("move this terminal window to top of screen to see FPS")
 print("=====================================================")
 
 
-class hud_text():
-    def __init__(self, font, text, camera, hud=None, attr=None, shader=None, xpos=0, ypos=0, size=1.0):
-        from pi3d.Display import Display
-                
-        self.attr = attr
-        self.hud = hud
-        self.font = font
-        self.camera = camera
-        self.flatsh = shader
-        self.value = None
-        self.text = text
-        self.size = size
+
+class HUD(object):
+    def __init__(self):
+
         
-        self.x = xpos * Display.INSTANCE.height
-        self.y = ypos * Display.INSTANCE.width
+        self.hud_update_frames = 4
+
+        self.layer_text_spacing = 16
         
-        self.last_formatted_text = ""
-        self.changed = False
-        self.gen_text()
-
-    def gen_text(self):
-        if(self.attr != None) and (self.hud != None):
-            value = hud.getattr(self.hud, self.attr, None)
-        else:
-            value = None
-
-        #if value == None:
-        #    txt = self.text
-        #else:
-        #    txt = self.text % value
-        txt = self.text
-
-        if txt != self.last_formatted_text: #getattr(self, "last_formatted_text", ""):
-            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='R')
-            self.text.position(self.x, self.y, 5)
-            self.text.set_material((0,0,0,0))
-            self.text.set_shader(self.flatsh)
-            self.last_formatted_text = self.text
-            self.changed = True
+        self.fps = 25
         
+        self.init_vars()
+        self.init_graphics()
+        self.init_run()
+
+    def init_vars(self):
+        self.pitch = 0
+        self.roll = 0
+        self.pitch_rate = 10
+        self.roll_rate = 3
+        self.heading_rate = 1
+        self.track_rate = 1
+        self.track = 325
+        self.airspeed = 121
+        self.groundspeed = 110
+        self.windspeed = 15
+        self.heading = 221
+        self.vertical_speed = -312        
         
-    def draw_text(self):
-        if self.text != None:
-            self.text.draw()
-            self.changed = False
-        
-
-bar_dist = 5
-ladder_step = 15
-ladder_thickness = 0.01
-ladder_zero_thickness = 0.02
-ladder_text_xpos = 1.0
-ladder_text_size = 0.004
-ladder_length = 1.5
-
-pitch = 0
-roll = 0
-pitch_rate = 10
-roll_rate = 3
-heading_rate = 1
-track_rate = 1
-track = 325
-airspeed = 121
-groundspeed = 110
-windspeed = 15
-
-heading = 221
-vertical_speed = -312
-
-hud_update_frames = 4
-hud_text_spacing = 16
-
-fps = 25
+    def init_graphics(self):
+        """ Initialise the HUD graphics """
 
 # Setup display and initialise pi3d
-DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=fps)
-DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
+        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=self.fps)
+        self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
 
-fpv_camera = pi3d.Camera.instance()
-text_camera = pi3d.Camera(is_3d=False)
-hud_camera = text_camera
+        self.fpv_camera = pi3d.Camera.instance()
+        self.text_camera = pi3d.Camera(is_3d=False)
+        self.hud_camera = self.text_camera
 
-#setup textures, light position and initial model position
+        #setup textures, light position and initial model position
 
-fpv_light = pi3d.Light((0, 0, 1))
+        self.fpv_light = pi3d.Light((0, 0, 1))
 
-#create shaders
-#shader = pi3d.Shader("uv_reflect")
-matsh = pi3d.Shader("mat_flat")  #For fixed color
-flatsh = pi3d.Shader("uv_flat")
+        #create shaders
+        #shader = pi3d.Shader("uv_reflect")
+        self.matsh = pi3d.Shader("mat_flat")  #For fixed color
+        self.flatsh = pi3d.Shader("uv_flat")
 
-#Create layers
-dataLayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
-statusLayer = pi3d.Layer(camera=text_camera, shader=flatsh, z=4.8, flip=True)
+        #Create layers
+        self.dataLayer = pi3d.Layer(camera=self.text_camera, shader=self.flatsh, z=4.8, flip=True)
+        self.statusLayer = pi3d.Layer(camera=self.text_camera, shader=self.flatsh, z=4.8, flip=True)
+        self.staticLayer = pi3d.Layer(camera=self.text_camera, shader=self.flatsh, z=4.8, flip=True)
 
-#Create textures
+        #Create textures
 
-print("start creating fonts")
-#fonts
-#hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
-hudFont = pi3d.Font("fonts/FreeSansBold.ttf", (50,255,50,220))   #usr/share/fonts/truetype/freefont/
+        print("start creating fonts")
+        #fonts
+        #hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
+        self.hudFont = pi3d.Font("fonts/FreeSansBold.ttf", (50,255,50,220))   #usr/share/fonts/truetype/freefont/
+        self.ladderFont = self.hudFont
+        self.textFont = self.hudFont
 
-
-ladderFont = hudFont
-textFont = hudFont
-
-print("end creating fonts")
-
-
-print("start creating ladder")
-                  
-ladder = HUDladder(font=hudFont, camera=hud_camera, shader=flatsh)
+        print("end creating fonts")
 
 
-print("end creating ladder")
+        print("start creating ladder")
+        self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
+        print("end creating ladder")
 
 
-print("start creating digits")
+        print("start creating digits")
 
 #digitsmap =
 
-pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=hud_text_spacing)
-roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=hud_text_spacing)
-heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=hud_text_spacing)
-track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=hud_text_spacing)
-airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=hud_text_spacing)
-groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=hud_text_spacing)
-windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=hud_text_spacing)
-vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=hud_text_spacing)
+        text_camera = self.text_camera
+        textFont = self.textFont
+        flatsh = self.flatsh
+        matsh = self.matsh
+        hudFont = textFont
+        
+        self.testText = pi3d.String(string="BLAH BLAH", camera=self.text_camera, font=self.textFont, is_3d=False, x=0, y=0, size=0.25, justify='R')
+        self.testText.set_shader(self.flatsh)
+        
+        
+        layer_text_spacing = self.layer_text_spacing
+        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
+        self.roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=layer_text_spacing)
+        self.heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=layer_text_spacing)
+        self.track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=layer_text_spacing)
+        self.airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=layer_text_spacing)
+        self.groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=layer_text_spacing)
+        self.windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=layer_text_spacing)
+        self.vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=layer_text_spacing)
 
-print("finished creating digits")
+        print("finished creating digits")
 
-statusText = []
-statusText.append( hud_text(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
-statusText.append( hud_text(hudFont, text="LABEL HERE", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.0, size=0.125) )
-statusText.append( hud_text(hudFont, text="LABEL THERE", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
-statusText.append( hud_text(hudFont, text="LABEL IT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+        self.staticText = []
+        #draw one offscreen with matsh shader to make this work.  Why? Who knows?
+        self.staticText.append( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
+        self.staticText.append( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
+        self.staticText.append( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
+        self.staticText.append( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+        #staticText.append( layer_var_text(hudFont, text="%01d", dataobj=self, attr="windspeed", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
 
-tick = 0
-av_fps = fps
-#i_n=0
-spf = 1.0 # seconds per frame, i.e. water image change
-next_time = time.time() + spf
+        self.statusText = []
+        #draw one offscreen with matsh shader to make this work.  Why? Who knows?
+        self.statusText.append( layer_text(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
+        self.statusText.append( layer_text(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125) )
+        self.statusText.append( layer_var_text(hudFont, text="{:1.1f}", dataobj=self, attr="roll", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125) )
 
-# Fetch key presses.
-mykeys = pi3d.Keyboard()
-#fr = 0
+    def init_run(self):
 
-hud_update_frame = 0
-timestamp = time.clock()
+        self.tick = 0
+        self.av_fps = self.fps
+        #i_n=0
+        self.spf = 1.0 # seconds per frame, i.e. water image change
+        self.next_time = time.time() + self.spf
 
-frameCount = 0
+        # Fetch key presses.
+        self.mykeys = pi3d.Keyboard()
+        #fr = 0
 
-# Display scene and rotate shape
-while DISPLAY.loop_running():
+        self.hud_update_frame = 0
+        self.timestamp = time.clock()
 
-  if(hud_update_frame == 0):
-      pitch_text.set_number("%01d" % pitch)
-      roll_text.set_number("%01d" % roll)
-  elif(hud_update_frame == 1):    
-      heading_text.set_number("%01d" % heading)
-      track_text.set_number("%01d" % track)
-      airspeed_text.set_number("%01d" % airspeed)
-  elif(hud_update_frame == 2):
-      windspeed_text.set_number("%01d" % av_fps)
-      groundspeed_text.set_number("%01d" % groundspeed)
-      vertical_speed_text.set_number("%01d" % vertical_speed)
-  elif(hud_update_frame == 3):    
-      dataLayer.start_layer()               # Draw on the text layer
-      pitch_text.draw()
-      roll_text.draw()
-      heading_text.draw()
-      track_text.draw()
-      airspeed_text.draw()
-      windspeed_text.draw()
-      groundspeed_text.draw()
-      vertical_speed_text.draw()
-      dataLayer.end_layer()                 # stop drawing on the text layer    
+#        self.frameCount = 0
 
-      statuschange = False
-      for text in statusText:
-          text.gen_text()
-          if text.changed:
-              statuschange = True
-      if statuschange:
-          statusLayer.start_layer()
-          for text in statusText:
-              text.draw_text()
-          statusLayer.end_layer()
+    def run_hud(self):
+        """ run the HUD main loop """
+        while self.DISPLAY.loop_running():
+            if(self.hud_update_frame == 0):
+                self.pitch_text.set_number("%01d" % self.pitch)
+                self.roll_text.set_number("%01d" % self.roll)
+            elif(self.hud_update_frame == 1):    
+                self.heading_text.set_number("%01d" % self.heading)
+                self.track_text.set_number("%01d" % self.track)
+                self.airspeed_text.set_number("%01d" % self.airspeed)
+            elif(self.hud_update_frame == 2):
+                self.windspeed_text.set_number("%01d" % self.av_fps)
+                self.groundspeed_text.set_number("%01d" % self.groundspeed)
+                self.vertical_speed_text.set_number("%01d" % self.vertical_speed)
+            elif(self.hud_update_frame == 3):
+                self.dataLayer.start_layer()               # Draw on the text layer
+                self.pitch_text.draw()
+                self.roll_text.draw()
+                self.heading_text.draw()
+                self.track_text.draw()
+                self.airspeed_text.draw()
+                self.windspeed_text.draw()
+                self.groundspeed_text.draw()
+                self.vertical_speed_text.draw()
+                self.dataLayer.end_layer()                 # stop drawing on the text layer    
+            elif(self.hud_update_frame == 4):
+                self.ladder.gen_ladder()
 
-      ladder.gen_ladder()
+                statuschange = False
+                for text in self.staticText:
+                    text.gen_text()
+                    if text.changed:
+                        statuschange = True
+                if statuschange:
+                    self.staticLayer.start_layer()
+                    for text in self.staticText:
+                        text.draw_text()
+                    self.staticLayer.end_layer()
+                self.staticText[0].text = "changed it again"
+
+                statuschange = False
+                for text in self.statusText:
+                    text.gen_text()
+                    if text.changed:
+                        statuschange = True
+                if statuschange:
+                    self.statusLayer.start_layer()
+                    for text in self.statusText:
+                        text.draw_text()
+                    self.statusLayer.end_layer()
+                self.staticText[0].text = "changed it again"
+
       
 # try glScissor for limiting extent of ladder drawing
 
-  ladder.draw_ladder(roll, pitch, 0)
+            self.ladder.draw_ladder(self.roll, self.pitch, 0)
 
-  dataLayer.draw_layer()
-  statusLayer.draw_layer()
+            self.dataLayer.draw_layer()
+            self.staticLayer.draw_layer()
+            self.statusLayer.draw_layer()
   
-  if time.time() > next_time:
-    next_time = time.time() + spf
-    av_fps = av_fps*0.9 + tick/spf*0.1 # exp smooth moving average
-#    print(av_fps, " FPS, ", pitch, " pitch")
-    tick = 0
+            if time.time() > self.next_time:
+                self.next_time = time.time() + self.spf
+                self.av_fps = self.av_fps*0.9 + self.tick/self.spf*0.1 # exp smooth moving average
+#                print(av_fps, " FPS, ", pitch, " pitch")
+                self.tick = 0
     
-  tick += 1
-
-  pitch += pitch_rate / av_fps
-  roll += roll_rate / av_fps
+            self.tick += 1
   
-  hud_update_frame += 1
-  if(hud_update_frame > hud_update_frames):
-      hud_update_frame = 0
+            self.hud_update_frame += 1
+            if(self.hud_update_frame > self.hud_update_frames):
+                self.hud_update_frame = 0
   
-  # Temporary
-  if(pitch > 70):
-      pitch -= 140
-  elif(pitch < -360):
-      pitch += 360
-  if(roll > 360):
-      roll -= 360
-  elif(roll < -360):
-      roll += 360
 
-  #pi3d.screenshot("/media/E856-DA25/New/fr%03d.jpg" % fr)
-  frameCount += 1
+            #pi3d.screenshot("/media/E856-DA25/New/fr%03d.jpg" % fr)
+  #          frameCount += 1
 
-  k = mykeys.read()
-  if k==27:
-    mykeys.close()
-    dataLayer.delete_buffers()
-    DISPLAY.destroy()
-    break
+            k = self.mykeys.read()
+            if k==27:
+                self.mykeys.close()
+                self.dataLayer.delete_buffers()
+                self.staticLayer.delete_buffers()
+                self.statusLayer.delete_buffers()
+                self.DISPLAY.destroy()
+                break
 
-quit()
+            self.update()
+        quit()
+
+
+    def update(self):
+        self.pitch += self.pitch_rate / self.av_fps
+        self.roll += self.roll_rate / self.av_fps
+        # Temporary
+        if(self.pitch > 70):
+            self.pitch -= 140
+        elif(self.pitch < -360):
+            self.pitch += 360
+        if(self.roll > 360):
+            self.roll -= 360
+        elif(self.roll < -360):
+            self.roll += 360
+
+
+hud=HUD()
+hud.init_run()
+hud.run_hud()
