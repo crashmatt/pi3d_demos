@@ -12,7 +12,7 @@ import numeric
 from HUDladder import HUDladder
 from LayerItems import layer_text
 from LayerItems import layer_var_text
-from LayerItems import layer_items
+from LayerItems import LayerItems
 
 print("=====================================================")
 print("press escape to escape")
@@ -117,13 +117,18 @@ class HUD(object):
 
         print("finished creating digits")
 
-        self.staticText = []
+        self.static_items = LayerItems()
+#        self.staticText = []
         #draw one offscreen with matsh shader to make this work.  Why? Who knows?
-        self.staticText.append( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
-        self.staticText.append( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
-        self.staticText.append( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
-        self.staticText.append( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+#        self.staticText.append( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
+#        self.staticText.append( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
+#        self.staticText.append( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
+#        self.staticText.append( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
         #staticText.append( layer_var_text(hudFont, text="%01d", dataobj=self, attr="windspeed", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+        self.static_items.add_item( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
+        self.static_items.add_item( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
+        self.static_items.add_item( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
+        self.static_items.add_item( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
 
         self.statusText = []
         #draw one offscreen with matsh shader to make this work.  Why? Who knows?
@@ -176,29 +181,22 @@ class HUD(object):
             elif(self.hud_update_frame == 4):
                 self.ladder.gen_ladder()
 
-                statuschange = False
-                for text in self.staticText:
-                    text.gen_text()
-                    if text.changed:
-                        statuschange = True
-                if statuschange:
+                if self.static_items.gen_items():
                     self.staticLayer.start_layer()
-                    for text in self.staticText:
-                        text.draw_text()
+                    self.static_items.draw_items()
                     self.staticLayer.end_layer()
-                self.staticText[0].text = "changed it again"
-
-                statuschange = False
-                for text in self.statusText:
-                    text.gen_text()
-                    if text.changed:
-                        statuschange = True
-                if statuschange:
-                    self.statusLayer.start_layer()
-                    for text in self.statusText:
-                        text.draw_text()
-                    self.statusLayer.end_layer()
-                self.staticText[0].text = "changed it again"
+                    
+ #               statuschange = False
+ #               for text in self.statusText:
+ #                   text.gen_text()
+ #                   if text.changed:
+ #                       statuschange = True
+ #               if statuschange:
+ #                   self.statusLayer.start_layer()
+ #                   for text in self.statusText:
+ #                       text.draw_text()
+ #                   self.statusLayer.end_layer()
+#                self.staticText[0].text = "changed it again"
 
       
 # try glScissor for limiting extent of ladder drawing

@@ -6,7 +6,7 @@ Created on 18 Jul 2014
 import pi3d
 import array
 
-class layer_items(object):
+class LayerItems(object):
     def __init__(self):
         self.items = []
     
@@ -15,15 +15,15 @@ class layer_items(object):
 
     def gen_items(self):
         statuschange = False
-        for item in items.texts:
-            item.get_text()
+        for item in self.items:
+            item.gen_item()
             if(item.changed):
                 statuschange = True
         return statuschange
     
     def draw_items(self):
         for item in self.items:
-            item.draw_text()
+            item.draw_item()
         
 class layer_item(object):
     def __init__(self, camera, shader=None, xpos=0, ypos=0):
