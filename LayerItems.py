@@ -106,16 +106,15 @@ class LayerVarText(LayerText):
         
 class LayerNumeric(LayerVarText):
     def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, xpos=0, ypos=0, size=1.0, phase=None, digits=3, spacing=15):
-        super(LayerNumeric, self).__init__(self, font, text, camera, dataobj, attr, shader, xpos, ypos, size, phase)
+        super(LayerNumeric, self).__init__(font, text, camera, dataobj, attr, shader, xpos, ypos, size, phase)
 
         self.digits = digits
         self.spacing = spacing
 
-        self.number = numeric.FastNumber(camera=self.camera, font=self.font, shader=self.shader, digits=self.digits, x=xpos, y=ypos, size=self.size, spacing=self.spacing)
+        self.number = numeric.FastNumber(camera=self.camera, font=self.font, shader=self.shader, digits=self.digits, x=self.x, y=self.y, size=self.size, spacing=self.spacing)
 
     def _gen_text(self):
         self.number.set_number(self.text)
-        self.number.generate()
         
     def draw_item(self):
         self.number.draw()

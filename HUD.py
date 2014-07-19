@@ -13,6 +13,7 @@ from HUDladder import HUDladder
 from LayerItems import LayerText
 from LayerItems import LayerVarText
 from LayerItems import LayerItems
+from LayerItems import LayerNumeric
 
 print("=====================================================")
 print("press escape to escape")
@@ -48,6 +49,8 @@ class HUD(object):
         self.windspeed = 15
         self.heading = 221
         self.vertical_speed = -312
+        self.altitude = 1024
+        self.climb_rate = 2.24
         
     def init_graphics(self):
         """ Initialise the HUD graphics """
@@ -91,7 +94,7 @@ class HUD(object):
         print("end creating ladder")
 
 
-        print("start creating digits")
+        print("start creating layers")
 
 #digitsmap =
 
@@ -100,36 +103,62 @@ class HUD(object):
         flatsh = self.flatsh
         matsh = self.matsh
         hudFont = textFont        
-        
         layer_text_spacing = self.layer_text_spacing
-        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
-        self.roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=layer_text_spacing)
-        self.heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=layer_text_spacing)
-        self.track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=layer_text_spacing)
-        self.airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=layer_text_spacing)
-        self.groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=layer_text_spacing)
-        self.windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=layer_text_spacing)
-        self.vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=layer_text_spacing)
+        
+        self.dynamic_items = LayerItems()
+        
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                  text="{:+02.0f}", dataobj=self,  attr="pitch", digits=3, phase=0, 
+                                                  xpos=0.3, ypos=-0.4, size=0.125, spacing=layer_text_spacing) )
 
-        print("finished creating digits")
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:+03.0f}", dataobj=self,  attr="roll", digits=4, phase=0,
+                                                  xpos=0.0, ypos=-0.4, size=0.125, spacing=layer_text_spacing) )
+        
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:+3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
+                                                  xpos=0.3, ypos=0.15, size=0.125, spacing=layer_text_spacing) )
+
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:+4.0f}", dataobj=self,  attr="altitude", digits=5, phase=0,
+                                                  xpos=0.3, ypos=0.3, size=0.125, spacing=layer_text_spacing) )
+
+#        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
+#        self.roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=layer_text_spacing)
+#        self.heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=layer_text_spacing)
+#        self.track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=layer_text_spacing)
+#        self.airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=layer_text_spacing)
+#        self.groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=layer_text_spacing)
+#        self.windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=layer_text_spacing)
+#        self.vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=layer_text_spacing)
+
 
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
-        self.static_items.add_item( LayerText(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
-        self.static_items.add_item( LayerText(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
-        self.static_items.add_item( LayerText(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
-        self.static_items.add_item( LayerText(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
+                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="ptch", xpos=0.27, ypos=-0.3, size=0.1) )
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="roll", xpos=0.2, ypos=-0.1, size=0.1) )
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="hdg", xpos=0.2, ypos=-0.2, size=0.1) )
 
         self.status_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
-        self.status_items.add_item( LayerText(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125, phase=0) )
-        self.status_items.add_item( LayerText(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125, phase = 1) )
-        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
+        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=matsh, 
+                                              text=" ", xpos=1.0, ypos=1.0, size=0.125, phase=0) )
+        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
+                                              text="MODE", xpos=0.0, ypos=0.1, size=0.1, phase = 1) )
+#        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
 
         #draw one offscreen with matsh shader to make this work.  Why? Who knows?
 #        self.statusText.append( LayerText(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
 #        self.statusText.append( LayerText(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125) )
 #        self.statusText.append( LayerVarText(hudFont, text="{:1.1f}", dataobj=self, attr="roll", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125) )
+
+        print("finished creating layers")
+
 
     def init_run(self):
 
@@ -152,28 +181,30 @@ class HUD(object):
         """ run the HUD main loop """
         while self.DISPLAY.loop_running():
             self.status_items.gen_items(self.hud_update_frame)
+            self.dynamic_items.gen_items(self.hud_update_frame)
 
-            if(self.hud_update_frame == 0):
-                self.pitch_text.set_number("%01d" % self.pitch)
-                self.roll_text.set_number("%01d" % self.roll)
-            elif(self.hud_update_frame == 1):    
-                self.heading_text.set_number("%01d" % self.heading)
-                self.track_text.set_number("%01d" % self.track)
-                self.airspeed_text.set_number("%01d" % self.airspeed)
-            elif(self.hud_update_frame == 2):
-                self.windspeed_text.set_number("%01d" % self.av_fps)
-                self.groundspeed_text.set_number("%01d" % self.groundspeed)
-                self.vertical_speed_text.set_number("%01d" % self.vertical_speed)
-            elif(self.hud_update_frame == 3):
+#            if(self.hud_update_frame == 0):
+#                self.pitch_text.set_number("%01d" % self.pitch)
+#                self.roll_text.set_number("%01d" % self.roll)
+#            elif(self.hud_update_frame == 1):    
+#                self.heading_text.set_number("%01d" % self.heading)
+#                self.track_text.set_number("%01d" % self.track)
+#                self.airspeed_text.set_number("%01d" % self.airspeed)
+#            elif(self.hud_update_frame == 2):
+#                self.windspeed_text.set_number("%01d" % self.av_fps)
+#                self.groundspeed_text.set_number("%01d" % self.groundspeed)
+#                self.vertical_speed_text.set_number("%01d" % self.vertical_speed)
+            if(self.hud_update_frame == 3):
                 self.dataLayer.start_layer()               # Draw on the text layer
-                self.pitch_text.draw()
-                self.roll_text.draw()
-                self.heading_text.draw()
-                self.track_text.draw()
-                self.airspeed_text.draw()
-                self.windspeed_text.draw()
-                self.groundspeed_text.draw()
-                self.vertical_speed_text.draw()
+                self.dynamic_items.draw_items()
+#                self.pitch_text.draw()
+#                self.roll_text.draw()
+#                self.heading_text.draw()
+#                self.track_text.draw()
+#                self.airspeed_text.draw()
+#                self.windspeed_text.draw()
+#                self.groundspeed_text.draw()
+#                self.vertical_speed_text.draw()
                 self.dataLayer.end_layer()                 # stop drawing on the text layer    
             elif(self.hud_update_frame == 4):
                 self.ladder.gen_ladder()
@@ -242,6 +273,8 @@ class HUD(object):
     def update(self):
         self.pitch += self.pitch_rate / self.av_fps
         self.roll += self.roll_rate / self.av_fps
+        self.altitude += self.climb_rate  / self.av_fps
+        
         # Temporary
         if(self.pitch > 70):
             self.pitch -= 140

@@ -112,11 +112,11 @@ class HUDladder(object):
         self.screenstep = 0.4           # ratio of screen height
         self.bar_thickness = 1          # pixels
         self.zero_bar_thickness = 2     # pixels
-        self.bar_width = 0.3            # ratio of screen width
+        self.bar_width = 0.2            # ratio of screen width
         self.bar_gap = 0.05             # ratio of screen width
-        self.font_scale = 0.15          # relative to original font size
+        self.font_scale = 0.08          # relative to original font size
         self.font_bar_gap = 0.07        # ratio of screen width
-        self.alpha = 1.0                # 0 to 1
+        self.alpha = 0.8                # 0 to 1
         self.maxDegrees = 80
         
 
@@ -141,7 +141,7 @@ class HUDladder(object):
         self.bars = []
         for i in xrange(-self.bar_count,self.bar_count+1):     #(-self.bar_count,self.bar_count):
             degstep = i * self.degstep
-            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep))
+            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep) )
 
             self.bars.append(bar)
 
@@ -176,5 +176,5 @@ class HUDladder(object):
 
             for bar in self.bars:
                 if(bar.degree < highpitch) and (bar.degree > lowpitch):
-                    bar.draw_bar(self.camera2d, alpha=1)
+                    bar.draw_bar(self.camera2d, alpha=self.alpha)
             
