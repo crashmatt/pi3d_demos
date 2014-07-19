@@ -10,8 +10,8 @@ import pi3d
 
 import numeric
 from HUDladder import HUDladder
-from LayerItems import layer_text
-from LayerItems import layer_var_text
+from LayerItems import LayerText
+from LayerItems import LayerVarText
 from LayerItems import LayerItems
 
 print("=====================================================")
@@ -47,7 +47,7 @@ class HUD(object):
         self.groundspeed = 110
         self.windspeed = 15
         self.heading = 221
-        self.vertical_speed = -312        
+        self.vertical_speed = -312
         
     def init_graphics(self):
         """ Initialise the HUD graphics """
@@ -99,11 +99,7 @@ class HUD(object):
         textFont = self.textFont
         flatsh = self.flatsh
         matsh = self.matsh
-        hudFont = textFont
-        
-        self.testText = pi3d.String(string="BLAH BLAH", camera=self.text_camera, font=self.textFont, is_3d=False, x=0, y=0, size=0.25, justify='R')
-        self.testText.set_shader(self.flatsh)
-        
+        hudFont = textFont        
         
         layer_text_spacing = self.layer_text_spacing
         self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
@@ -118,23 +114,22 @@ class HUD(object):
         print("finished creating digits")
 
         self.static_items = LayerItems()
-#        self.staticText = []
-        #draw one offscreen with matsh shader to make this work.  Why? Who knows?
-#        self.staticText.append( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
-#        self.staticText.append( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
-#        self.staticText.append( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
-#        self.staticText.append( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
-        #staticText.append( layer_var_text(hudFont, text="%01d", dataobj=self, attr="windspeed", camera=text_camera, shader=flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
-        self.static_items.add_item( layer_text(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
-        self.static_items.add_item( layer_text(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
-        self.static_items.add_item( layer_text(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
-        self.static_items.add_item( layer_text(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
+        #First item with matsh to make it work.  Don't know why.  It just is.
+        self.static_items.add_item( LayerText(self.textFont, text=" ", camera=self.text_camera, shader=self.matsh, xpos=1.0, ypos=1.0, size=0.125) )
+        self.static_items.add_item( LayerText(self.textFont, text="LABEL HERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=0.0, size=0.125) )
+        self.static_items.add_item( LayerText(self.textFont, text="LABEL THERE", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.1, size=0.125) )
+        self.static_items.add_item( LayerText(self.textFont, text="LABEL IT", camera=self.text_camera, shader=self.flatsh, xpos=0.0, ypos=-0.2, size=0.125) )
 
-        self.statusText = []
+        self.status_items = LayerItems()
+        #First item with matsh to make it work.  Don't know why.  It just is.
+        self.status_items.add_item( LayerText(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125, phase=0) )
+        self.status_items.add_item( LayerText(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125, phase = 1) )
+        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
+
         #draw one offscreen with matsh shader to make this work.  Why? Who knows?
-        self.statusText.append( layer_text(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
-        self.statusText.append( layer_text(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125) )
-        self.statusText.append( layer_var_text(hudFont, text="{:1.1f}", dataobj=self, attr="roll", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125) )
+#        self.statusText.append( LayerText(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
+#        self.statusText.append( LayerText(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125) )
+#        self.statusText.append( LayerVarText(hudFont, text="{:1.1f}", dataobj=self, attr="roll", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125) )
 
     def init_run(self):
 
@@ -156,6 +151,8 @@ class HUD(object):
     def run_hud(self):
         """ run the HUD main loop """
         while self.DISPLAY.loop_running():
+            self.status_items.gen_items(self.hud_update_frame)
+
             if(self.hud_update_frame == 0):
                 self.pitch_text.set_number("%01d" % self.pitch)
                 self.roll_text.set_number("%01d" % self.roll)
@@ -185,6 +182,12 @@ class HUD(object):
                     self.staticLayer.start_layer()
                     self.static_items.draw_items()
                     self.staticLayer.end_layer()
+
+            
+                self.statusLayer.start_layer()
+                self.status_items.draw_items()
+                self.statusLayer.end_layer()
+
                     
  #               statuschange = False
  #               for text in self.statusText:
