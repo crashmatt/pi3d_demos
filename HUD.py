@@ -14,6 +14,7 @@ from LayerItems import LayerText
 from LayerItems import LayerVarText
 from LayerItems import LayerItems
 from LayerItems import LayerNumeric
+from LayerItems import LayerShape
 
 print("=====================================================")
 print("press escape to escape")
@@ -143,6 +144,12 @@ class HUD(object):
                                               text="roll", xpos=0.2, ypos=-0.1, size=0.1) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="hdg", xpos=0.2, ypos=-0.2, size=0.1) )
+        
+        bar_shape = pi3d.Plane(camera=self.text_camera,  w=50, h=2)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( -25,  0, 5)
+        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
 
         self.status_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.

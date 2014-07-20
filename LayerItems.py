@@ -37,7 +37,7 @@ class LayerItem(object):
 #    """ A 2D item on an OffScreenTexture layer with information about how, where and when to draw it.
 #        Is overridden by specific item type classes"""
     
-    def __init__(self, camera, shader, xpos=0, ypos=0, phase=None):
+    def __init__(self, camera=None, shader=None, xpos=0, ypos=0, phase=None):
 #        """ *phase* controls when to update/generate a new image on the layer. Can be used to balance processor loading""""
 
         from pi3d.Display import Display
@@ -48,6 +48,8 @@ class LayerItem(object):
         self.camera = camera
         self.shader = shader
         self.phase = phase
+        
+        self.changed = False    #flag to show if text has been generated but not redrawn yet
 
 
 class LayerText(LayerItem):
@@ -60,7 +62,6 @@ class LayerText(LayerItem):
         self.size = size
         
         self.last_text = ""     #remember last generated text to prevent re-generation of unchanged text        
-        self.changed = False    #flag to show if text has been generated but not redrawn yet
         
         
     def _gen_text(self):
@@ -119,3 +120,19 @@ class LayerNumeric(LayerVarText):
     def draw_item(self):
         self.number.draw()
         
+        
+class LayerShape(LayerItem):
+    def __init__(self, drwshape, phase=None):
+        super(LayerShape, self).__init__(self, phase=phase)
+
+        self.drwshape = drwshape
+        self.changed = True
+    
+    def gen_item(self):
+        #Something useless just to override and do nothing
+        if(self.drwshape == None):
+            print("Item not defined")
+    
+    def draw_item(self):
+        self.drwshape.draw()
+        self.changed = False
