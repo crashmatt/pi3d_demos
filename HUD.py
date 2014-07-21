@@ -3,7 +3,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from pi3d.util.OffScreenTexture import OffScreenTexture
 
-import math, random, time, glob, string
+import math, random, time, glob, string, pickle
+
+import ConfigParser
 
 #import demo
 import pi3d
@@ -40,7 +42,7 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = 10
+        self.pitch_rate = 5
         self.roll_rate = 3
         self.heading_rate = 1
         self.track_rate = 1
@@ -143,12 +145,21 @@ class HUD(object):
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="roll", xpos=0.2, ypos=-0.1, size=0.1) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="hdg", xpos=0.2, ypos=-0.2, size=0.1) )
+                                              text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
+        self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
+                                              text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
+
         
-        bar_shape = pi3d.Plane(camera=self.text_camera,  w=50, h=2)
+        bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)
         bar_shape.set_draw_details(self.matsh, [], 0, 0)
         bar_shape.set_material((128,128,128,255))
-        bar_shape.position( -25,  0, 5)
+        bar_shape.position( 0,  10, 5)
+        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
+
+        bar_shape = pi3d.Plane(camera=self.text_camera,  w=100, h=1)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( 0,  0, 5)
         self.static_items.add_item( LayerShape(bar_shape, phase=2) )
 
         self.status_items = LayerItems()
@@ -157,12 +168,8 @@ class HUD(object):
                                               text=" ", xpos=1.0, ypos=1.0, size=0.125, phase=0) )
         self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", xpos=0.0, ypos=0.1, size=0.1, phase = 1) )
+        
 #        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
-
-        #draw one offscreen with matsh shader to make this work.  Why? Who knows?
-#        self.statusText.append( LayerText(hudFont, text=" ", camera=text_camera, shader=matsh, xpos=1.0, ypos=1.0, size=0.125) )
-#        self.statusText.append( LayerText(hudFont, text="LABEL NOT", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.1, size=0.125) )
-#        self.statusText.append( LayerVarText(hudFont, text="{:1.1f}", dataobj=self, attr="roll", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125) )
 
         print("finished creating layers")
 
@@ -190,28 +197,9 @@ class HUD(object):
             self.status_items.gen_items(self.hud_update_frame)
             self.dynamic_items.gen_items(self.hud_update_frame)
 
-#            if(self.hud_update_frame == 0):
-#                self.pitch_text.set_number("%01d" % self.pitch)
-#                self.roll_text.set_number("%01d" % self.roll)
-#            elif(self.hud_update_frame == 1):    
-#                self.heading_text.set_number("%01d" % self.heading)
-#                self.track_text.set_number("%01d" % self.track)
-#                self.airspeed_text.set_number("%01d" % self.airspeed)
-#            elif(self.hud_update_frame == 2):
-#                self.windspeed_text.set_number("%01d" % self.av_fps)
-#                self.groundspeed_text.set_number("%01d" % self.groundspeed)
-#                self.vertical_speed_text.set_number("%01d" % self.vertical_speed)
             if(self.hud_update_frame == 3):
                 self.dataLayer.start_layer()               # Draw on the text layer
                 self.dynamic_items.draw_items()
-#                self.pitch_text.draw()
-#                self.roll_text.draw()
-#                self.heading_text.draw()
-#                self.track_text.draw()
-#                self.airspeed_text.draw()
-#                self.windspeed_text.draw()
-#                self.groundspeed_text.draw()
-#                self.vertical_speed_text.draw()
                 self.dataLayer.end_layer()                 # stop drawing on the text layer    
             elif(self.hud_update_frame == 4):
                 self.ladder.gen_ladder()
@@ -226,18 +214,6 @@ class HUD(object):
                 self.status_items.draw_items()
                 self.statusLayer.end_layer()
 
-                    
- #               statuschange = False
- #               for text in self.statusText:
- #                   text.gen_text()
- #                   if text.changed:
- #                       statuschange = True
- #               if statuschange:
- #                   self.statusLayer.start_layer()
- #                   for text in self.statusText:
- #                       text.draw_text()
- #                   self.statusLayer.end_layer()
-#                self.staticText[0].text = "changed it again"
 
       
 # try glScissor for limiting extent of ladder drawing
@@ -274,6 +250,7 @@ class HUD(object):
                 break
 
             self.update()
+        self.store_hud_config()
         quit()
 
 
@@ -291,8 +268,14 @@ class HUD(object):
             self.roll -= 360
         elif(self.roll < -360):
             self.roll += 360
-
-
+            
+    def store_hud_config(self):
+        config = ConfigParser.ConfigParser()
+        config.add_section("static_layer")
+        
+        with open('hud.cfg', 'wb') as configfile:
+            config.write(configfile)
+    
 hud=HUD()
 hud.init_run()
 hud.run_hud()

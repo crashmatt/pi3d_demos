@@ -37,12 +37,36 @@ class HUDladderBar(object):
             return (0,255,0,255)
         else:
             return (255,0,0,255)
+    
+    def get_bar_width(self):
+        if(self.degree == 0):
+            return 0.3
+        else:
+            return 0.22
+    
+    def get_bar_thickness(self):
+        if(self.degree == 0):
+            return 3
+        else:
+            return 2
+        
+    def get_bar_gap(self):
+        return 0.05
+    
+    def get_font_size(self):
+        if(self.degree == 0):
+            return 0.15
+        else:
+            return 0.125
+    
+    def get_font_bar_gap(self):
+        return 0.05
 
 #    def get_font_colour(self):
 #        return (50, 200, 50, 1.0)
 #        return (200, 0, 0, 1.0)
 
-    def generate_bar(self, font, shaders=[None], width=0.3, thickness = 2, bar_gap=0.05, font_bar_gap=0.07, strscale=0.6):
+    def generate_bar(self, font, shaders=[None]):
         """ *shaders* is array of [flatsh, matsh]    """
 
         self.genshaders = shaders
@@ -52,27 +76,31 @@ class HUDladderBar(object):
         self.font = font
         
         barcolour = self.get_bar_colour()
+        bar_gap = self.get_bar_gap()
+        fontsize = self.get_font_size()
+        font_bar_gap = self.get_font_bar_gap()
+        
 #        fontcolour = self.get_font_colour()
 
         from pi3d.Display import Display
-        bar_width = width * Display.INSTANCE.width
+        bar_width = self.get_bar_width() * Display.INSTANCE.width
         
         self.bar._start()
         
-        bar_shape = pi3d.Plane(camera=self.camera,  w=bar_width, h=thickness)
+        bar_shape = pi3d.Plane(camera=self.camera,  w=bar_width, h=self.get_bar_thickness())
         bar_shape.set_draw_details(matsh, [], 0, 0)
         bar_shape.set_material(barcolour)
         bar_shape.position( self.xoffset,  self.yoffset, 5)            
         bar_shape.draw()
     
         degText = "%01d" % self.degree
-        degStr = pi3d.String(camera=self.camera, font=font, string=degText, sx=0.6, sy=0.6, justify='R')
+        degStr = pi3d.String(camera=self.camera, font=font, string=degText, size=fontsize, justify='R', is_3d=False)
         degStr.position(bar_width/2 + (font_bar_gap * self.pixel_width) + self.xoffset, self.yoffset,5)
         degStr.set_shader(flatsh)
 #        degStr.set_material(fontcolour)
         degStr.draw()
     
-        degStr = pi3d.String(camera=self.camera, font=font, string=degText, sx=0.6, sy=0.6, justify='C')
+        degStr = pi3d.String(camera=self.camera, font=font, string=degText, size=fontsize, justify='C', is_3d=False)
         degStr.position((-bar_width/2) - (font_bar_gap * self.pixel_width) + self.xoffset,  self.yoffset,5)
         degStr.set_shader(flatsh)
 #        degStr.set_material(fontcolour)
@@ -141,7 +169,7 @@ class HUDladder(object):
         self.bars = []
         for i in xrange(-self.bar_count,self.bar_count+1):     #(-self.bar_count,self.bar_count):
             degstep = i * self.degstep
-            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep) )
+            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep))
 
             self.bars.append(bar)
 
