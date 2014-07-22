@@ -18,6 +18,8 @@ from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
 
+from Box2d import Box2d
+
 print("=====================================================")
 print("press escape to escape")
 print("move this terminal window to top of screen to see FPS")
@@ -148,6 +150,7 @@ class HUD(object):
                                               text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
         self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, w=50, h=25, x=0, y=100 )))
 
         
         bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)

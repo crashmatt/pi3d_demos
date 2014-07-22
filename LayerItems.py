@@ -66,7 +66,7 @@ class LayerText(LayerItem):
         
     def _gen_text(self):
         if self.text != self.last_text:
-            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='R')
+            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='C')
             self.text.position(self.x, self.y, 5)
             self.text.set_material((0,0,0,0))
             self.text.set_shader(self.shader)
