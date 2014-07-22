@@ -150,7 +150,8 @@ class HUD(object):
                                               text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
         self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
-        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, w=50, h=25, x=0, y=100 )))
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     w=50, h=25, x=0, y=100, line_thickness=1)) )
 
         
         bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)

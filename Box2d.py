@@ -35,19 +35,19 @@ class Box2d(object):
         self.box.set_material((fill_colour))
         self.box.set_draw_details(self.shader, [], 0, 0)
 
-        self.boxtop = Plane.Plane(camera=camera, w=w, h=line_thickness, x=x, y=y+(h/2)+line_thickness, z=z)
+        self.boxtop = Plane.Plane(camera=camera, w=w+(line_thickness*2), h=line_thickness, x=x, y=y+(h/2)+(line_thickness/2), z=z)
         self.boxtop.set_material((line_colour))
         self.boxtop.set_draw_details(self.shader, [], 0, 0)
 
-        self.boxbottom = Plane.Plane(camera=camera, w=w, h=line_thickness, x=x, y=y-(h/2)-line_thickness, z=z)
+        self.boxbottom = Plane.Plane(camera=camera, w=w+(line_thickness*2), h=line_thickness, x=x, y=y-(h/2)-(line_thickness/2), z=z)
         self.boxbottom.set_material((line_colour))
         self.boxbottom.set_draw_details(self.shader, [], 0, 0)
 
-        self.boxleft = Plane.Plane(camera=camera, w=line_thickness, h=h, x=x-(w/2), y=y, z=z)   #-line_thickness
+        self.boxleft = Plane.Plane(camera=camera, w=line_thickness, h=h+(line_thickness*2), x=x-(w/2)-(line_thickness/2), y=y, z=z)
         self.boxleft.set_material((line_colour))
         self.boxleft.set_draw_details(self.shader, [], 0, 0)
 
-        self.boxright = Plane.Plane(camera=camera, w=line_thickness, h=h, x=x+(w/2)+line_thickness, y=y, z=z)
+        self.boxright = Plane.Plane(camera=camera, w=line_thickness, h=h+(line_thickness*2), x=x+(w/2)+(line_thickness/2), y=y, z=z)
         self.boxright.set_material((line_colour))
         self.boxright.set_draw_details(self.shader, [], 0, 0)
         
