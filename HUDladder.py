@@ -87,10 +87,22 @@ class HUDladderBar(object):
         
         self.bar._start()
         
-        bar_shape = pi3d.Plane(camera=self.camera,  w=bar_width, h=self.get_bar_thickness())
+#        bar_shape = pi3d.Plane(camera=self.camera,  w=bar_width, h=self.get_bar_thickness())
+#        bar_shape.set_draw_details(matsh, [], 0, 0)
+#        bar_shape.set_material(barcolour)
+#        bar_shape.position( self.xoffset,  self.yoffset, 5)            
+#        bar_shape.draw()
+
+        half_bar_width = self.get_bar_width() * Display.INSTANCE.width * 0.5
+        gap_width = Display.INSTANCE.width * bar_gap
+            
+        bar_shape = pi3d.Plane(camera=self.camera,  w=half_bar_width-gap_width, h=self.get_bar_thickness())
         bar_shape.set_draw_details(matsh, [], 0, 0)
         bar_shape.set_material(barcolour)
-        bar_shape.position( self.xoffset,  self.yoffset, 5)            
+        bar_shape.position( self.xoffset-(half_bar_width*0.5)-(gap_width*0.5) ,  self.yoffset, 5) #
+        bar_shape.draw()
+
+        bar_shape.position( self.xoffset+(half_bar_width*0.5)+(gap_width*0.5) ,  self.yoffset, 5) #
         bar_shape.draw()
     
         degText = "%01d" % self.degree

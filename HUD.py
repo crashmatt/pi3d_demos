@@ -20,6 +20,8 @@ from LayerItems import LayerShape
 
 from Box2d import Box2d
 
+import HUDConfig as HUDConfig
+
 print("=====================================================")
 print("press escape to escape")
 print("move this terminal window to top of screen to see FPS")
@@ -125,8 +127,8 @@ class HUD(object):
                                                   xpos=0.3, ypos=0.15, size=0.125, spacing=layer_text_spacing) )
 
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                 text="{:+4.0f}", dataobj=self,  attr="altitude", digits=5, phase=0,
-                                                  xpos=0.3, ypos=0.3, size=0.125, spacing=layer_text_spacing) )
+                                                 text="{:+04.0f}", dataobj=self,  attr="altitude", digits=5, phase=0,
+                                                  xpos=0.4, ypos=0.35, size=0.125, spacing=layer_text_spacing) )
 
 #        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
 #        self.roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=layer_text_spacing)
@@ -140,18 +142,20 @@ class HUD(object):
 
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
-        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
-                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     w=75, h=25, x=235, y=202, line_thickness=1)) )
+#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
+#                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="ptch", xpos=0.27, ypos=-0.3, size=0.1) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="roll", xpos=0.2, ypos=-0.1, size=0.1) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="ASL", xpos=0.35, ypos=0.35, size=0.1) )
         self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
-        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     w=50, h=25, x=0, y=100, line_thickness=1)) )
 
         
         bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)
@@ -198,13 +202,18 @@ class HUD(object):
     def run_hud(self):
         """ run the HUD main loop """
         while self.DISPLAY.loop_running():
-            self.status_items.gen_items(self.hud_update_frame)
             self.dynamic_items.gen_items(self.hud_update_frame)
 
-            if(self.hud_update_frame == 3):
+            if(self.hud_update_frame == 2):
                 self.dataLayer.start_layer()               # Draw on the text layer
                 self.dynamic_items.draw_items()
                 self.dataLayer.end_layer()                 # stop drawing on the text layer    
+            elif(self.hud_update_frame == 3):
+                if(self.status_items.gen_items(self.hud_update_frame)):
+                    self.statusLayer.start_layer()
+                    self.status_items.draw_items()
+                    self.statusLayer.end_layer()
+                
             elif(self.hud_update_frame == 4):
                 self.ladder.gen_ladder()
 
@@ -214,9 +223,6 @@ class HUD(object):
                     self.staticLayer.end_layer()
 
             
-                self.statusLayer.start_layer()
-                self.status_items.draw_items()
-                self.statusLayer.end_layer()
 
 
       
@@ -225,8 +231,8 @@ class HUD(object):
             self.ladder.draw_ladder(self.roll, self.pitch, 0)
 
             self.dataLayer.draw_layer()
-            self.staticLayer.draw_layer()
             self.statusLayer.draw_layer()
+            self.staticLayer.draw_layer()
   
             if time.time() > self.next_time:
                 self.next_time = time.time() + self.spf

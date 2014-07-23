@@ -32,6 +32,8 @@ class LayerItems(object):
         for item in self.items:
             item.draw_item()
 
+            
+        
         
 class LayerItem(object):
 #    """ A 2D item on an OffScreenTexture layer with information about how, where and when to draw it.
@@ -136,3 +138,25 @@ class LayerShape(LayerItem):
     def draw_item(self):
         self.drwshape.draw()
         self.changed = False
+        
+
+class Layers(object):
+    ''' PROBALY NOT VERY USEFUL - not enough control after generate output
+    A collection of Layers and LayerItems which allow them to be generated and redrawn'''
+    def __init__(self):
+        ''' init self.layers as a tuple (Layer, LayerItems)'''
+        self.layers=[]
+        
+    def add(self, layer, layer_items):
+        ''' Add a layer and layer items'''
+        self.layers.append((layer, layer_items))
+        
+    def generate(self, phase=None):
+        for layer in self.layers:
+            layer[1].gen_items(phase)
+            
+    def draw_layers(self):
+        for layer in self.layers:
+            layer[0].start_layer()
+            layer[1].draw_items()
+            layer[0].end_layer()
