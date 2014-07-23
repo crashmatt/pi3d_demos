@@ -51,13 +51,17 @@ class HUD(object):
         self.heading_rate = 1
         self.track_rate = 1
         self.track = 325
-        self.airspeed = 121
+        self.tas = 131
+        self.ias = 121
         self.groundspeed = 110
         self.windspeed = 15
         self.heading = 221
-        self.vertical_speed = -312
-        self.altitude = 1024
-        self.climb_rate = 2.24
+        self.vertical_speed = -3.12
+        self.asl = 1024             #altitude above sea level
+        self.agl = 880              #altitude above ground level
+        self.ahl = 880              #altitude above home level
+        
+#        self.climb_rate = 2.24
         
     def init_graphics(self):
         """ Initialise the HUD graphics """
@@ -127,7 +131,7 @@ class HUD(object):
                                                   xpos=0.3, ypos=0.15, size=0.125, spacing=layer_text_spacing) )
 
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                 text="{:+04.0f}", dataobj=self,  attr="altitude", digits=5, phase=0,
+                                                 text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
                                                   xpos=0.4, ypos=0.35, size=0.125, spacing=layer_text_spacing) )
 
 #        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
@@ -142,7 +146,8 @@ class HUD(object):
 
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
-        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
+                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75),
                                                      w=75, h=25, x=235, y=202, line_thickness=1)) )
 #        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
 #                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
@@ -153,9 +158,11 @@ class HUD(object):
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="ASL", xpos=0.35, ypos=0.35, size=0.1) )
+                                              text="AGL", xpos=0.35, ypos=0.35, size=0.1) )
         self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     line_colour=(0,0,0,0.7), fill_colour=(0,0,0,0.75), w=75, h=25, x=0, y=150, line_thickness=1)) )
 
         
         bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)
@@ -267,7 +274,7 @@ class HUD(object):
     def update(self):
         self.pitch += self.pitch_rate / self.av_fps
         self.roll += self.roll_rate / self.av_fps
-        self.altitude += self.climb_rate  / self.av_fps
+        self.agl += self.vertical_speed  / self.av_fps
         
         # Temporary
         if(self.pitch > 70):

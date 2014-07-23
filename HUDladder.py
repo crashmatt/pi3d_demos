@@ -10,6 +10,7 @@ import time
 
 
 class HUDladderBar(object):
+    ''' Draws a single bar in the ladder'''
     def __init__(self, camera, shader, degree, ypos, scrnheight=0.1):
         self.degree = degree
 
@@ -22,13 +23,17 @@ class HUDladderBar(object):
         self.camera = camera
         self.shader = shader
                 
+        #This is an off screen texture onto which the bar is drawn
         self.bar = OffScreenTexture("bar", h=self.pixel_height)
 
         # need to do offscreentexture first so its size can be used for the following.
         self.xoffset = int((self.bar.ix - Display.INSTANCE.width) * 0.5)
         self.yoffset = int((self.bar.iy - Display.INSTANCE.height) * 0.5)
 
+        # This is the sprite onto which the texture is drawn, positioned at the correct location on the ladder
         self.sprite = pi3d.FlipSprite(camera=camera, w=self.bar.ix, h=self.bar.iy, y=ypos, z=5, flip=True)
+
+    # The following functions return values controlling the look and feel of the bar    
 
     def get_bar_colour(self):
         if(self.degree == 0):
@@ -66,8 +71,10 @@ class HUDladderBar(object):
 #        return (50, 200, 50, 1.0)
 #        return (200, 0, 0, 1.0)
 
+
     def generate_bar(self, font, shaders=[None]):
-        """ *shaders* is array of [flatsh, matsh]    """
+        """ draw the bar onto the off screen texture.  Only done once.
+        *shaders* is array of [flatsh, matsh]    """
 
         self.genshaders = shaders
         flatsh = self.genshaders[0]
