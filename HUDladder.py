@@ -42,7 +42,7 @@ class HUDladder(object):
         self.bar_gap = 0.05             # ratio of screen width
         self.font_scale = 0.08          # relative to original font size
         self.font_bar_gap = 0.07        # ratio of screen width
-        self.alpha = 0.8                # 0 to 1
+        self.alpha = 2                # 0 to 255
         self.maxDegrees = 80
         
 

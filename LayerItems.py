@@ -39,13 +39,13 @@ class LayerItem(object):
 #    """ A 2D item on an OffScreenTexture layer with information about how, where and when to draw it.
 #        Is overridden by specific item type classes"""
     
-    def __init__(self, camera=None, shader=None, xpos=0, ypos=0, phase=None):
+    def __init__(self, camera=None, shader=None, x=0, y=0, phase=None):
 #        """ *phase* controls when to update/generate a new image on the layer. Can be used to balance processor loading""""
 
         from pi3d.Display import Display
     
-        self.x = xpos * Display.INSTANCE.height     #position offset in screen pixels
-        self.y = ypos * Display.INSTANCE.width
+        self.x = x  #pos * Display.INSTANCE.height     #position offset in screen pixels
+        self.y = y  #pos * Display.INSTANCE.width
 
         self.camera = camera
         self.shader = shader
@@ -55,9 +55,9 @@ class LayerItem(object):
 
 
 class LayerText(LayerItem):
-    def __init__(self, font, text, camera, shader=None, xpos=0, ypos=0, size=1.0, phase=None):
+    def __init__(self, font, text, camera, shader=None, x=0, y=0, size=1.0, phase=None):
 
-        super(LayerText, self).__init__(camera, shader, xpos, ypos, phase)
+        super(LayerText, self).__init__(camera, shader, x, y, phase)
                         
         self.font = font
         self.text = text
@@ -71,6 +71,7 @@ class LayerText(LayerItem):
             self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='C')
             self.text.position(self.x, self.y, 5)
             self.text.set_material((0,0,0,0))
+            self.text.set_alpha(2)
             self.text.set_shader(self.shader)
             self.last_text = self.text
             self.changed = True
@@ -86,12 +87,12 @@ class LayerText(LayerItem):
 
 class LayerVarText(LayerText):
     
-    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, xpos=0, ypos=0, size=1.0, phase=None):
+    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None):
         self.attr = attr
         self.dataobj = dataobj
         self.textformat = text
         
-        super(LayerVarText, self).__init__(font, text, camera, shader, xpos, ypos, size, phase)
+        super(LayerVarText, self).__init__(font, text, camera, shader, x, y, size, phase)
         
         
     def gen_item(self):
@@ -108,13 +109,14 @@ class LayerVarText(LayerText):
         
         
 class LayerNumeric(LayerVarText):
-    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, xpos=0, ypos=0, size=1.0, phase=None, digits=3, spacing=15):
-        super(LayerNumeric, self).__init__(font, text, camera, dataobj, attr, shader, xpos, ypos, size, phase)
+    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, digits=3, spacing=15, justify='R' ):
+        super(LayerNumeric, self).__init__(font, text, camera, dataobj, attr, shader, x, y, size, phase)
 
         self.digits = digits
         self.spacing = spacing
 
-        self.number = numeric.FastNumber(camera=self.camera, font=self.font, shader=self.shader, digits=self.digits, x=self.x, y=self.y, size=self.size, spacing=self.spacing)
+        self.number = numeric.FastNumber(camera=self.camera, font=self.font, shader=self.shader, 
+                                         digits=self.digits, x=self.x, y=self.y, size=self.size, spacing=self.spacing, justify=justify)
 
     def _gen_text(self):
         self.number.set_number(self.text)

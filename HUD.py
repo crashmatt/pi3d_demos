@@ -17,6 +17,7 @@ from LayerItems import LayerVarText
 from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
+from ScreenGrid import ScreenScale
 
 from Box2d import Box2d
 
@@ -34,7 +35,7 @@ class HUD(object):
 
         
         self.hud_update_frames = 4
-
+        
         self.layer_text_spacing = 16
         
         self.fps = 25
@@ -48,7 +49,7 @@ class HUD(object):
         self.roll = 0
         self.pitch_rate = 5
         self.roll_rate = 3
-        self.heading_rate = 1
+        self.heading_rate = 15
         self.track_rate = 1
         self.track = 325
         self.tas = 131
@@ -69,6 +70,8 @@ class HUD(object):
 # Setup display and initialise pi3d
         self.DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=self.fps)
         self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
+        
+        self.grid = ScreenScale(0.025,0.075)
 
         self.fpv_camera = pi3d.Camera.instance()
         self.text_camera = pi3d.Camera(is_3d=False)
@@ -118,59 +121,66 @@ class HUD(object):
         
         self.dynamic_items = LayerItems()
         
+        x,y = self.grid.get_grid_pixel(18, 0)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                   text="{:+02.0f}", dataobj=self,  attr="pitch", digits=3, phase=0, 
-                                                  xpos=0.3, ypos=-0.4, size=0.125, spacing=layer_text_spacing) )
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
 
+        x,y = self.grid.get_grid_pixel(18, 1)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+03.0f}", dataobj=self,  attr="roll", digits=4, phase=0,
-                                                  xpos=0.0, ypos=-0.4, size=0.125, spacing=layer_text_spacing) )
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
         
+        x,y = self.grid.get_grid_pixel(18, 2)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
-                                                  xpos=0.3, ypos=0.15, size=0.125, spacing=layer_text_spacing) )
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
 
+        x,y = self.grid.get_grid_pixel(18, 3)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
-                                                  xpos=0.4, ypos=0.35, size=0.125, spacing=layer_text_spacing) )
-
-#        self.pitch_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=0, size=0.125, spacing=layer_text_spacing)
-#        self.roll_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=50, size=0.125, spacing=layer_text_spacing)
-#        self.heading_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=100, size=0.125, spacing=layer_text_spacing)
-#        self.track_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=150, size=0.125, spacing=layer_text_spacing)
-#        self.airspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=180, y=-50, size=0.125, spacing=layer_text_spacing)
-#        self.groundspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=3, x=100, y=-30, size=0.125, spacing=layer_text_spacing)
-#        self.windspeed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=2, x=100, y=0, size=0.125, spacing=layer_text_spacing)
-#        self.vertical_speed_text = numeric.FastNumber(camera=text_camera, font=textFont, shader=flatsh, digits=5, x=180, y=-200, size=0.125, spacing=layer_text_spacing)
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
 
 
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
+        
+        x,y = self.grid.get_grid_pixel(19, 1)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
                                                      line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75),
-                                                     w=75, h=25, x=235, y=202, line_thickness=1)) )
+                                                     w=layer_text_spacing*5, h=25, x=x, y=y, line_thickness=1, justify='L')) )
+        
 #        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
 #                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
+
+        x,y = self.grid.get_grid_pixel(12, 0)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="ptch", xpos=0.27, ypos=-0.3, size=0.1) )
+                                              text="ptch", x=x, y=y, size=0.1) )
+        
+        x,y = self.grid.get_grid_pixel(12, 1)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="roll", xpos=0.2, ypos=-0.1, size=0.1) )
+                                              text="roll", x=x, y=y, size=0.1) )
+        
+        x,y = self.grid.get_grid_pixel(12, 2)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="hdg", xpos=0.3, ypos=-0.2, size=0.1) )
+                                              text="hdg", x=x, y=y, size=0.1) )
+        
+        x,y = self.grid.get_grid_pixel(12, 3)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="AGL", xpos=0.35, ypos=0.35, size=0.1) )
-        self.static_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
-                                              text="MODE", xpos=0.0, ypos=0.2, size=0.1, phase = 1) )
+                                              text="AGL", x=x, y=y, size=0.1) )
+                
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,0,0,0.7), fill_colour=(0,0,0,0.75), w=75, h=25, x=0, y=150, line_thickness=1)) )
+
 
 
         self.status_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
         self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=matsh, 
-                                              text=" ", xpos=1.0, ypos=1.0, size=0.125, phase=0) )
+                                              text=" ", x=1.0, y=1.0, size=0.125, phase=0) )
+        x,y = self.grid.get_grid_pixel(0, 6)
         self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
-                                              text="MODE", xpos=0.0, ypos=0.1, size=0.1, phase = 1) )
+                                              text="MODE", x=x, y=y, size=0.1, phase = 1) )
         
 #        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
 
@@ -261,19 +271,27 @@ class HUD(object):
 
 
     def update(self):
-        self.pitch += self.pitch_rate / self.av_fps
-        self.roll += self.roll_rate / self.av_fps
-        self.agl += self.vertical_speed  / self.av_fps
+        frametime = 1 / self.av_fps
+        self.pitch += self.pitch_rate * frametime
+        self.roll += self.roll_rate * frametime
+        self.agl += self.vertical_speed * frametime
+        self.heading += self.heading_rate * frametime
         
         # Temporary
         if(self.pitch > 70):
             self.pitch -= 140
         elif(self.pitch < -360):
             self.pitch += 360
+        
         if(self.roll > 360):
             self.roll -= 360
         elif(self.roll < -360):
             self.roll += 360
+
+        if(self.heading > 360):
+            self.heading -= 360
+        elif(self.heading < 0):
+            self.heading -= 360
             
     def store_hud_config(self):
         config = ConfigParser.ConfigParser()

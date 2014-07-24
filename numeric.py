@@ -13,11 +13,19 @@ class FastNumber(object):
 
     #total digits including negatives and decimal points
     #spacing = pixels between digits
-    def __init__(self,  font, camera=None, shader=None, x=0, y=0, size=0.5, digits=1, spacing=25):
+    def __init__(self,  font, camera=None, shader=None, x=0, y=0, size=0.5, digits=1, spacing=25, justify='R'):
         self.digits = []
         self.camera = camera
         self.shader = shader
-        self.x = x
+        if(justify=='R'):
+            self.x = x + (spacing * 0.5)
+        elif(justify == 'L'):
+            self.x = x + (spacing * 0.5) - (spacing * digits)            
+        elif(justify == 'C'):
+            self.x = x + (spacing * 0.5) - (spacing * digits * 0.5)
+        else:
+            self.x = x
+        
         self.y = y
         self.num_digits = digits
         self.value = 0
@@ -85,12 +93,17 @@ class FastDigit(object):
         digit.translate(self.x, self.y, 1)
         digit.set_shader(self.shader)
         self.neg = ("-", digit)
+        digit = pi3d.String(camera=self.camera, font=self.font, string="+", is_3d=False, z=1, size=self.size)
+        digit.translate(self.x, self.y, 1)
+        digit.set_shader(self.shader)
+        self.pos = ("+", digit)
         
         for i in xrange(0,10):
             tempstr = "%0d" % i
             digit = pi3d.String(camera=self.camera, font=self.font, string=tempstr, is_3d=False, z=1, size=self.size)
             digit.translate(self.x, self.y, 1)
             digit.set_shader(self.shader)
+            digit.set_alpha(255)
             self.digits.append((tempstr,digit))
         
         self.digit = self.space
@@ -112,6 +125,8 @@ class FastDigit(object):
                     self.digit = self.dot
                 elif(numchar == ','):
                     self.digit = self.comma
+                elif(numchar == '+'):
+                    self.digit = self.pos
                 else:
                     self.digit = (" ", None)
 
