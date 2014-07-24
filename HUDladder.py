@@ -8,6 +8,26 @@ from pi3d.util.OffScreenTexture import OffScreenTexture
 import math
 import time
 
+class HUDladderCenter(object):
+    def __init__(self, camera, matsh):
+        self.camera = camera
+        self.matsh = matsh
+        
+    def draw(self):
+        bar_shape = pi3d.Plane(camera=self.camera,  w=1, h=20)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( 0,  10, 5)
+        bar_shape.draw()
+#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
+
+        bar_shape = pi3d.Plane(camera=self.camera,  w=100, h=1)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( 0,  0, 5)
+        bar_shape.draw()
+#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
+
 
 class HUDladderBar(object):
     ''' Draws a single bar in the ladder'''
@@ -194,6 +214,8 @@ class HUDladder(object):
 
         self.inits_done = 0
         
+        self.center = HUDladderCenter(self.camera, self.matsh)
+        
 
     def _gen_ladder(self):
         """ Generate the ladder """
@@ -224,4 +246,8 @@ class HUDladder(object):
             for bar in self.bars:
                 if(bar.degree < highpitch) and (bar.degree > lowpitch):
                     bar.draw_bar(self.camera2d, alpha=self.alpha)
+                    
+
+    def draw_center(self):
+        self.center.draw()
             

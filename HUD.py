@@ -164,18 +164,6 @@ class HUD(object):
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,0,0,0.7), fill_colour=(0,0,0,0.75), w=75, h=25, x=0, y=150, line_thickness=1)) )
 
-        
-        bar_shape = pi3d.Plane(camera=self.text_camera,  w=1, h=20)
-        bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
-        bar_shape.position( 0,  10, 5)
-        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
-
-        bar_shape = pi3d.Plane(camera=self.text_camera,  w=100, h=1)
-        bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
-        bar_shape.position( 0,  0, 5)
-        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
 
         self.status_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
@@ -227,6 +215,7 @@ class HUD(object):
                 if self.static_items.gen_items():
                     self.staticLayer.start_layer()
                     self.static_items.draw_items()
+                    self.ladder.draw_center()
                     self.staticLayer.end_layer()
 
             
