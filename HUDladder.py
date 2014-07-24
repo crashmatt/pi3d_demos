@@ -8,25 +8,110 @@ from pi3d.util.OffScreenTexture import OffScreenTexture
 import math
 import time
 
-class HUDladderCenter(object):
-    def __init__(self, camera, matsh):
-        self.camera = camera
-        self.matsh = matsh
-        
-    def draw(self):
-        bar_shape = pi3d.Plane(camera=self.camera,  w=1, h=20)
-        bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
-        bar_shape.position( 0,  10, 5)
-        bar_shape.draw()
-#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
+class HUDladder(object):
+    '''
+    Responsible for creating and drawing a HUD pitch ladder according to aircraft attitude
+    
+    Uses a HUDLadderBar object to draw individual bars of the ladder
+    Places the bars as sprites in a 3d pattern around the center
+    Does ladder movement by rotating the camera
+    
+    Owns the HUDLadderCenter object that draws the static aircraft marker. It does not draw it as
+    part of the ladder since the center is drawn on another layer
+    '''
 
-        bar_shape = pi3d.Plane(camera=self.camera,  w=100, h=1)
-        bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
-        bar_shape.position( 0,  0, 5)
-        bar_shape.draw()
-#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
+    def __init__(self, font, camera, shader):
+        '''
+        Constructor
+        '''
+        from pi3d.Display import Display
+        
+#        self.screenSize = screenSize
+        self.font = font
+               
+        self.roll = 0
+        self.pitch = 0
+        self.heading = 0
+        self.track = 0
+        
+        self.degstep = 10
+        self.screenstep = 0.4           # ratio of screen height
+        self.bar_thickness = 1          # pixels
+        self.zero_bar_thickness = 2     # pixels
+        self.bar_width = 0.2            # ratio of screen width
+        self.bar_gap = 0.05             # ratio of screen width
+        self.font_scale = 0.08          # relative to original font size
+        self.font_bar_gap = 0.07        # ratio of screen width
+        self.alpha = 0.8                # 0 to 1
+        self.maxDegrees = 80
+        
+
+        # 2d camera for generating sprites
+        self.camera = camera    #pi3d.Camera(is_3d=False)
+        self.shader = shader
+        
+        # camera for viewing the placed sprites. Owned byt the ladder since it moves
+        self.camera2d = pi3d.Camera(is_3d = False)
+        
+        self.flatsh = shader    #pi3d.Shader("uv_flat")
+        self.matsh = pi3d.Shader("mat_flat")
+
+        self.screen_width = Display.INSTANCE.width
+        self.screen_height = Display.INSTANCE.height
+ 
+        self.bar_count = int(math.ceil(self.maxDegrees / self.degstep))
+        self.pixelsPerBar = self.screenstep * self.screen_height
+        
+        self.bar_pixel_height = int(Display.INSTANCE.height * 0.1)
+
+        self.bars = []
+        for i in xrange(-self.bar_count,self.bar_count+1):     #(-self.bar_count,self.bar_count):
+            degstep = i * self.degstep
+            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep))
+
+            self.bars.append(bar)
+
+        self.inits_done = 0
+        
+        self.center = HUDLadderCenter(self.camera, self.matsh)
+        
+
+    def _gen_ladder(self):
+        """ Generate the ladder """
+        for bar in self.bars:
+            bar.draw_bar()
+            bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
+        
+    def gen_ladder(self):
+        if self.inits_done < 1:
+            self._gen_ladder()
+            self.inits_done += 1
+        
+       
+    def draw_ladder(self, roll, pitch, yaw):
+        """ Draw the ladder. roll, pitch, yaw parameters in degrees"""
+        if self.inits_done > 0:
+            pos=0
+            rot = 0
+            ypos = pitch * self.pixelsPerBar / self.degstep
+            pitchrange = self.degstep * 0.5 / self.screenstep
+            lowpitch = pitch - pitchrange 
+            highpitch = pitch + pitchrange
+            
+            self.camera2d.reset()
+            self.camera2d.rotateZ(roll)
+            self.camera2d.position((0,ypos,0))
+
+            for bar in self.bars:
+                if(bar.degree < highpitch) and (bar.degree > lowpitch):
+                    bar.draw_bar(self.camera2d, alpha=self.alpha)
+                    
+    def draw_center(self):
+        self.center.draw()
+        
+
+
+
 
 
 class HUDladderBar(object):
@@ -156,98 +241,28 @@ class HUDladderBar(object):
 
 
 
-class HUDladder(object):
-    '''
-    classdocs
-    '''
 
-    def __init__(self, font, camera, shader):
-        '''
-        Constructor
-        '''
-        from pi3d.Display import Display
-        
-#        self.screenSize = screenSize
-        self.font = font
-               
-        self.roll = 0
-        self.pitch = 0
-        self.heading = 0
-        self.track = 0
-        
-        self.degstep = 10
-        self.screenstep = 0.4           # ratio of screen height
-        self.bar_thickness = 1          # pixels
-        self.zero_bar_thickness = 2     # pixels
-        self.bar_width = 0.2            # ratio of screen width
-        self.bar_gap = 0.05             # ratio of screen width
-        self.font_scale = 0.08          # relative to original font size
-        self.font_bar_gap = 0.07        # ratio of screen width
-        self.alpha = 0.8                # 0 to 1
-        self.maxDegrees = 80
-        
 
-        # 2d camera for generating sprites
-        self.camera = camera    #pi3d.Camera(is_3d=False)
-        self.shader = shader
-        
-        # camera for viewing the placed sprites. Owned byt the ladder since it moves
-        self.camera2d = pi3d.Camera(is_3d = False)
-        
-        self.flatsh = shader    #pi3d.Shader("uv_flat")
-        self.matsh = pi3d.Shader("mat_flat")
 
-        self.screen_width = Display.INSTANCE.width
-        self.screen_height = Display.INSTANCE.height
- 
-        self.bar_count = int(math.ceil(self.maxDegrees / self.degstep))
-        self.pixelsPerBar = self.screenstep * self.screen_height
+class HUDLadderCenter(object):
+    def __init__(self, camera, matsh):
+        self.camera = camera
+        self.matsh = matsh
         
-        self.bar_pixel_height = int(Display.INSTANCE.height * 0.1)
+    def draw(self):
+        bar_shape = pi3d.Plane(camera=self.camera,  w=1, h=20)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( 0,  10, 5)
+        bar_shape.draw()
+#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
 
-        self.bars = []
-        for i in xrange(-self.bar_count,self.bar_count+1):     #(-self.bar_count,self.bar_count):
-            degstep = i * self.degstep
-            bar = HUDladderBar(self.camera, self.shader, degstep, ypos=int(degstep*self.pixelsPerBar/self.degstep))
+        bar_shape = pi3d.Plane(camera=self.camera,  w=100, h=1)
+        bar_shape.set_draw_details(self.matsh, [], 0, 0)
+        bar_shape.set_material((128,128,128,255))
+        bar_shape.position( 0,  0, 5)
+        bar_shape.draw()
+#        self.static_items.add_item( LayerShape(bar_shape, phase=2) )
 
-            self.bars.append(bar)
 
-        self.inits_done = 0
-        
-        self.center = HUDladderCenter(self.camera, self.matsh)
-        
-
-    def _gen_ladder(self):
-        """ Generate the ladder """
-        for bar in self.bars:
-            bar.draw_bar()
-            bar.generate_bar(font=self.font, shaders=[self.flatsh, self.matsh])
-        
-    def gen_ladder(self):
-        if self.inits_done < 1:
-            self._gen_ladder()
-            self.inits_done += 1
-        
-       
-    def draw_ladder(self, roll, pitch, yaw):
-        """ Draw the ladder. roll, pitch, yaw parameters in degrees"""
-        if self.inits_done > 0:
-            pos=0
-            rot = 0
-            ypos = pitch * self.pixelsPerBar / self.degstep
-            pitchrange = self.degstep * 0.5 / self.screenstep
-            lowpitch = pitch - pitchrange 
-            highpitch = pitch + pitchrange
-            
-            self.camera2d.reset()
-            self.camera2d.rotateZ(roll)
-            self.camera2d.position((0,ypos,0))
-
-            for bar in self.bars:
-                if(bar.degree < highpitch) and (bar.degree > lowpitch):
-                    bar.draw_bar(self.camera2d, alpha=self.alpha)
-                    
-
-    def draw_center(self):
-        self.center.draw()
             
