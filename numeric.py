@@ -13,10 +13,12 @@ class FastNumber(object):
 
     #total digits including negatives and decimal points
     #spacing = pixels between digits
-    def __init__(self,  font, camera=None, shader=None, x=0, y=0, size=0.5, digits=1, spacing=25, justify='R'):
+    def __init__(self,  font, camera=None, shader=None, x=0, y=0, size=0.5, digits=1, spacing=25, justify='R', z=1, alpha=1):
         self.digits = []
         self.camera = camera
         self.shader = shader
+        self.alpha = alpha
+        self.z = z
         if(justify=='R'):
             self.x = x + (spacing * 0.5)
         elif(justify == 'L'):
@@ -39,7 +41,8 @@ class FastNumber(object):
         xpos = self.x
         self.digits = []
         for i in xrange(0,self.num_digits):
-            fdigit = FastDigit(font=self.font, camera=self.camera, shader=self.shader, x=xpos, y=self.y, size=self.size)
+            fdigit = FastDigit(font=self.font, camera=self.camera, shader=self.shader, x=xpos, y=self.y, 
+                               size=self.size, z=self.z, alpha=self.alpha)
             self.digits.append(fdigit)
             xpos += self.spacing
 
@@ -65,13 +68,15 @@ class FastNumber(object):
 
 class FastDigit(object):
 
-    def __init__(self, font, camera=None, shader=None, x=0, y=0, size=1.0, default="0"):
+    def __init__(self, font, camera=None, shader=None, x=0, y=0, z=1,size=1.0, default="0", alpha=1.0):
         self.shader = shader
         self.camera = camera
         self.size = size
         self.font = font
         self.x = x
         self.y = y
+        self.z = z
+        self.alpha = alpha
         self.digits = []
                 
         self.generate_digits()
@@ -81,29 +86,29 @@ class FastDigit(object):
     def generate_digits(self):
         self.digits = []
         self.space = (" ", None)
-        digit = pi3d.String(camera=self.camera, font=self.font, string=".", is_3d=False, z=1, size=self.size)
-        digit.translate(self.x, self.y, 1)
+        digit = pi3d.String(camera=self.camera, font=self.font, string=".", is_3d=False, z=self.z, size=self.size)
+        digit.translate(self.x, self.y, self.z)
         digit.set_shader(self.shader)
         self.dot = (".", digit)
-        digit = pi3d.String(camera=self.camera, font=self.font, string=",", is_3d=False, z=1, size=self.size)
-        digit.translate(self.x, self.y, 1)
+        digit = pi3d.String(camera=self.camera, font=self.font, string=",", is_3d=False, z=self.z, size=self.size)
+        digit.translate(self.x, self.y, self.z)
         digit.set_shader(self.shader)
         self.comma = (",", digit)
-        digit = pi3d.String(camera=self.camera, font=self.font, string="-", is_3d=False, z=1, size=self.size)
-        digit.translate(self.x, self.y, 1)
+        digit = pi3d.String(camera=self.camera, font=self.font, string="-", is_3d=False, z=self.z, size=self.size)
+        digit.translate(self.x, self.y, self.z)
         digit.set_shader(self.shader)
         self.neg = ("-", digit)
-        digit = pi3d.String(camera=self.camera, font=self.font, string="+", is_3d=False, z=1, size=self.size)
-        digit.translate(self.x, self.y, 1)
+        digit = pi3d.String(camera=self.camera, font=self.font, string="+", is_3d=False, z=self.z, size=self.size)
+        digit.translate(self.x, self.y, self.z)
         digit.set_shader(self.shader)
         self.pos = ("+", digit)
         
         for i in xrange(0,10):
             tempstr = "%0d" % i
-            digit = pi3d.String(camera=self.camera, font=self.font, string=tempstr, is_3d=False, z=1, size=self.size)
-            digit.translate(self.x, self.y, 1)
+            digit = pi3d.String(camera=self.camera, font=self.font, string=tempstr, is_3d=False, z=self.z, size=self.size)
+            digit.translate(self.x, self.y, self.z)
             digit.set_shader(self.shader)
-            digit.set_alpha(255)
+            digit.set_alpha(self.alpha)
             self.digits.append((tempstr,digit))
         
         self.digit = self.space

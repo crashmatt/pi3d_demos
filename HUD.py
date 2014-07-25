@@ -52,8 +52,8 @@ class HUD(object):
         self.heading_rate = 15
         self.track_rate = 1
         self.track = 325
-        self.tas = 131
-        self.ias = 121
+        self.tas = 131              # true airspeed
+        self.ias = 121              # indicated airspeed
         self.groundspeed = 110
         self.windspeed = 15
         self.heading = 221

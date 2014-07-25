@@ -55,23 +55,24 @@ class LayerItem(object):
 
 
 class LayerText(LayerItem):
-    def __init__(self, font, text, camera, shader=None, x=0, y=0, size=1.0, phase=None):
+    def __init__(self, font, text, camera, shader=None, x=0, y=0, size=1.0, phase=None, z=1, alpha=1):
 
         super(LayerText, self).__init__(camera, shader, x, y, phase)
                         
         self.font = font
         self.text = text
         self.size = size
-        
+        self.z = z
+        self.alpha = alpha
         self.last_text = ""     #remember last generated text to prevent re-generation of unchanged text        
         
         
     def _gen_text(self):
         if self.text != self.last_text:
-            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, size=self.size, justify='C')
+            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify='C')
             self.text.position(self.x, self.y, 5)
             self.text.set_material((0,0,0,0))
-            self.text.set_alpha(2)
+            self.text.set_alpha(self.alpha)
             self.text.set_shader(self.shader)
             self.last_text = self.text
             self.changed = True
@@ -87,12 +88,12 @@ class LayerText(LayerItem):
 
 class LayerVarText(LayerText):
     
-    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None):
+    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, z=1, alpha=1):
         self.attr = attr
         self.dataobj = dataobj
         self.textformat = text
         
-        super(LayerVarText, self).__init__(font, text, camera, shader, x, y, size, phase)
+        super(LayerVarText, self).__init__(font, text, camera, shader, x, y, size, phase, z, alpha)
         
         
     def gen_item(self):
@@ -109,14 +110,15 @@ class LayerVarText(LayerText):
         
         
 class LayerNumeric(LayerVarText):
-    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, digits=3, spacing=15, justify='R' ):
-        super(LayerNumeric, self).__init__(font, text, camera, dataobj, attr, shader, x, y, size, phase)
+    def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, digits=3, spacing=15, justify='R', z=1, alpha=1 ):
+        super(LayerNumeric, self).__init__(font, text, camera, dataobj, attr, shader, x, y, size, phase, z, alpha)
 
         self.digits = digits
         self.spacing = spacing
 
         self.number = numeric.FastNumber(camera=self.camera, font=self.font, shader=self.shader, 
-                                         digits=self.digits, x=self.x, y=self.y, size=self.size, spacing=self.spacing, justify=justify)
+                                         digits=self.digits, x=self.x, y=self.y, size=self.size, 
+                                         spacing=self.spacing, justify=justify, z=self.z, alpha=self.alpha)
 
     def _gen_text(self):
         self.number.set_number(self.text)
