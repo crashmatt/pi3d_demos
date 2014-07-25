@@ -147,8 +147,13 @@ class HUD(object):
         
         x,y = self.grid.get_grid_pixel(19, 1)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
-                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75),
-                                                     w=layer_text_spacing*5, h=25, x=x, y=y, line_thickness=1, justify='L')) )
+                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.5),
+                                                     w=layer_text_spacing*5, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
+
+        x,y = self.grid.get_grid_pixel(15, 3)   
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     line_colour=(0,255,0,0.5), fill_colour=(0,0,0,0.5), 
+                                                     w=75, h=25, x=x, y=y, z=6, line_thickness=1)) )
         
 #        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
 #                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
@@ -168,9 +173,7 @@ class HUD(object):
         x,y = self.grid.get_grid_pixel(12, 3)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="AGL", x=x, y=y, size=0.1) )
-                
-        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,0,0,0.7), fill_colour=(0,0,0,0.75), w=75, h=25, x=0, y=150, line_thickness=1)) )
+        
 
 
 

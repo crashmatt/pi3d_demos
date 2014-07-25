@@ -38,10 +38,11 @@ class Box2d(object):
         else:
             xoffset = int(x)
 
-        self.box = Plane.Plane(camera=camera, w=w, h=h, x=xoffset, y=y, z=z)
-        self.box.set_material((fill_colour))
-        self.box.set_draw_details(self.shader, [], 0, 0)
-        self.box.set_alpha(fill_colour[3])
+        if(fill_colour[3] > 0):
+            self.box = Plane.Plane(camera=camera, w=w, h=h, x=xoffset, y=y, z=z)
+            self.box.set_material((fill_colour))
+            self.box.set_draw_details(self.shader, [], 0, 0)
+            self.box.set_alpha(fill_colour[3])
 
         self.boxtop = Plane.Plane(camera=camera, w=w+(line_thickness*2), h=line_thickness, x=xoffset, y=y+(h/2)+(line_thickness/2), z=z)
         self.boxtop.set_material((line_colour))
@@ -64,7 +65,9 @@ class Box2d(object):
         self.boxright.set_alpha(line_colour[3])
         
     def draw(self):
-        self.box.draw()
+        box = getattr(self, "box", None) 
+        if(box != None):
+            box.draw()
         self.boxtop.draw()
         self.boxbottom.draw()
         self.boxleft.draw()
