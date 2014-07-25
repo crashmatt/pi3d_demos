@@ -54,6 +54,7 @@ class HUD(object):
         self.track = 325
         self.tas = 131              # true airspeed
         self.ias = 121              # indicated airspeed
+        self.aspd_rate = 1
         self.groundspeed = 110
         self.windspeed = 15
         self.heading = 221
@@ -121,59 +122,73 @@ class HUD(object):
         
         self.dynamic_items = LayerItems()
         
-        x,y = self.grid.get_grid_pixel(18, 0)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                  text="{:+02.0f}", dataobj=self,  attr="pitch", digits=3, phase=0, 
-                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
+ #       x,y = self.grid.get_grid_pixel(18, 0)
+ #       self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+ #                                                 text="{:+02.0f}", dataobj=self,  attr="pitch", digits=3, phase=0, 
+ #                                                 x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
 
-        x,y = self.grid.get_grid_pixel(18, 1)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                 text="{:+03.0f}", dataobj=self,  attr="roll", digits=4, phase=0,
-                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
+#        x,y = self.grid.get_grid_pixel(18, 1)
+#        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+#                                                 text="{:+03.0f}", dataobj=self,  attr="roll", digits=4, phase=0,
+#                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
         
-        x,y = self.grid.get_grid_pixel(18, 2)
+        x,y = self.grid.get_grid_pixel(0, 6)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                 text="{:+3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
-                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
+                                                 text="{:3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='C') )
 
-        x,y = self.grid.get_grid_pixel(18, 3)
+        x,y = self.grid.get_grid_pixel(18, 5)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
+
+        x,y = self.grid.get_grid_pixel(-19, 5)
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:03.0f}", dataobj=self,  attr="tas", digits=4, phase=0,
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
 
 
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is.
         
-        x,y = self.grid.get_grid_pixel(19, 1)
-        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
-                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.5),
-                                                     w=layer_text_spacing*5, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
-
-        x,y = self.grid.get_grid_pixel(15, 3)   
+        x,y = self.grid.get_grid_pixel(19, 5)   
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,255,0,0.5), fill_colour=(0,0,0,0.5), 
-                                                     w=75, h=25, x=x, y=y, z=6, line_thickness=1)) )
+                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75), 
+                                                     w=layer_text_spacing*8, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
         
 #        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
 #                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
 
-        x,y = self.grid.get_grid_pixel(12, 0)
-        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="ptch", x=x, y=y, size=0.1) )
+#        x,y = self.grid.get_grid_pixel(12, 0)
+#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+#                                              text="ptch", x=x, y=y, size=0.1) )
         
-        x,y = self.grid.get_grid_pixel(12, 1)
-        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="roll", x=x, y=y, size=0.1) )
+#        x,y = self.grid.get_grid_pixel(12, 1)
+#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+#                                              text="roll", x=x, y=y, size=0.1) )
         
-        x,y = self.grid.get_grid_pixel(12, 2)
-        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="hdg", x=x, y=y, size=0.1) )
+#        x,y = self.grid.get_grid_pixel(-2, 6)
+#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+#                                              text="hdg", x=x, y=y, size=0.1) )
+        x,y = self.grid.get_grid_pixel(0, 6)
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
+                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,2),
+                                                     w=layer_text_spacing*3.5, h=25, x=x+5, y=y, z=6, 
+                                                     line_thickness=1, justify='C')) )
+
         
-        x,y = self.grid.get_grid_pixel(12, 3)
+        x,y = self.grid.get_grid_pixel(12, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="AGL", x=x, y=y, size=0.1) )
         
+        
+        x,y = self.grid.get_grid_pixel(-12, 5)
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="TAS", x=x, y=y, size=0.1) )
+        x,y = self.grid.get_grid_pixel(-18, 5)
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
+                                                     w=120, h=25, x=x, y=y, z=6, line_thickness=1, justify='R')) )
 
 
 
@@ -232,8 +247,6 @@ class HUD(object):
                     self.staticLayer.end_layer()
 
             
-
-
       
 # try glScissor for limiting extent of ladder drawing
 
@@ -279,6 +292,8 @@ class HUD(object):
         self.roll += self.roll_rate * frametime
         self.agl += self.vertical_speed * frametime
         self.heading += self.heading_rate * frametime
+        self.tas += self.aspd_rate * frametime
+        self.ias += self.aspd_rate * frametime
         
         # Temporary
         if(self.pitch > 70):
