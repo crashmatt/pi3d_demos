@@ -19,6 +19,8 @@ from LayerItems import LayerNumeric
 from LayerItems import LayerShape
 from ScreenGrid import ScreenScale
 
+from Indicator import LinearIndicator
+
 from Box2d import Box2d
 
 import HUDConfig as HUDConfig
@@ -103,6 +105,11 @@ class HUD(object):
 
         print("end creating fonts")
 
+        x,y = self.grid.get_grid_pixel(-12, 0)
+        self.VSI = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "vertical_speed", 
+                                   indmax=200, indmin=-200, x=x, y=y, z=3, width=15, length=200, 
+                                   orientation="V", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.5), 
+                                   line_thickness = 2, needle_img="default_needle.img")
 
         print("start creating ladder")
         self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
@@ -146,6 +153,9 @@ class HUD(object):
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:03.0f}", dataobj=self,  attr="tas", digits=4, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
+        
+        self.dynamic_items.add_item( LayerShape(self.VSI.needle) )
+
 
 
         self.static_items = LayerItems()
@@ -155,6 +165,8 @@ class HUD(object):
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75), 
                                                      w=layer_text_spacing*8, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
+        
+        self.static_items.add_item( LayerShape(self.VSI.bezel) )
         
 #        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
 #                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )

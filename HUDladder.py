@@ -23,6 +23,8 @@ class HUDladder(object):
     def __init__(self, font, camera, shader):
         '''
         Constructor
+        *camera* 2d camera for drawing ladder sprites
+        *shader* flatsh for drawing ladder bars
         '''
         from pi3d.Display import Display
         
