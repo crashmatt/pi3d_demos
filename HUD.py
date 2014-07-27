@@ -65,6 +65,7 @@ class HUD(object):
         self.asl = 1024             #altitude above sea level
         self.agl = 880              #altitude above ground level
         self.ahl = 880              #altitude above home level
+        self.slip = 0
         
 #        self.climb_rate = 2.24
         
@@ -72,7 +73,7 @@ class HUD(object):
         """ Initialise the HUD graphics """
 
 # Setup display and initialise pi3d
-        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=self.fps)
+        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=self.fps)  #w=640
         self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
         
         self.grid = ScreenScale(0.025,0.075)
@@ -106,11 +107,17 @@ class HUD(object):
 
         print("end creating fonts")
 
-        x,y = self.grid.get_grid_pixel(-12, 0)
+        x,y = self.grid.get_grid_pixel(14, 0)
         self.VSI = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "vertical_speed", 
-                                   indmax=200, indmin=-200, x=x, y=y, z=3, width=15, length=200, 
+                                   indmax=200, indmin=-200, x=x, y=y, z=3, width=20, length=180, 
                                    orientation="V", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.5), 
                                    line_thickness = 2, needle_img="/home/matt/pi/demos/default_needle.img")
+
+        x,y = self.grid.get_grid_pixel(0, -6)
+        self.slip_indicator = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "slip", 
+                                              indmax=0.1, indmin=-0.1, x=x, y=y, z=3, width=25, length=250, 
+                                              orientation="H", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.75), 
+                                              line_thickness = 2, needle_img="/home/matt/pi/demos/default_needle.img")
 
         print("start creating ladder")
         self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
@@ -154,9 +161,16 @@ class HUD(object):
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:03.0f}", dataobj=self,  attr="tas", digits=4, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
+
+        x,y = self.grid.get_grid_pixel(13, 3)
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:+03.0f}", dataobj=self,  attr="vertical_speed", digits=4, phase=0,
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='C') )
         
         self.dynamic_items.add_item( LayerDynamicShape(self.VSI, phase=0) )
-
+        
+        self.dynamic_items.add_item( LayerDynamicShape(self.slip_indicator, phase=0) )
+        
 
 
         self.static_items = LayerItems()
@@ -168,28 +182,15 @@ class HUD(object):
                                                      w=layer_text_spacing*8, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
         
         self.static_items.add_item( LayerShape(self.VSI.bezel) )
+        self.static_items.add_item( LayerShape(self.slip_indicator.bezel) )
         
-#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.matsh, 
-#                                              text=" ", xpos=1.0, ypos=1.0, size=0.125) )
 
-#        x,y = self.grid.get_grid_pixel(12, 0)
-#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-#                                              text="ptch", x=x, y=y, size=0.1) )
-        
-#        x,y = self.grid.get_grid_pixel(12, 1)
-#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-#                                              text="roll", x=x, y=y, size=0.1) )
-        
-#        x,y = self.grid.get_grid_pixel(-2, 6)
-#        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-#                                              text="hdg", x=x, y=y, size=0.1) )
         x,y = self.grid.get_grid_pixel(0, 6)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
                                                      line_colour=(0,255,0,0.75), fill_colour=(0,0,0,2),
                                                      w=layer_text_spacing*3.5, h=25, x=x+5, y=y, z=6, 
                                                      line_thickness=1, justify='C')) )
 
-        
         x,y = self.grid.get_grid_pixel(12, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="AGL", x=x, y=y, size=0.1) )
@@ -198,6 +199,7 @@ class HUD(object):
         x,y = self.grid.get_grid_pixel(-12, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="TAS", x=x, y=y, size=0.1) )
+        
         x,y = self.grid.get_grid_pixel(-18, 5)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
@@ -308,6 +310,8 @@ class HUD(object):
         self.tas += self.aspd_rate * frametime
         self.ias += self.aspd_rate * frametime
         self.vertical_speed =  random.randrange(-200, 200, 1)
+        self.slip = float(random.randrange(-10,10)) * 0.01
+        
         
         # Temporary
         if(self.pitch > 70):

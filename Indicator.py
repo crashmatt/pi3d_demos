@@ -40,7 +40,7 @@ class LinearIndicator(Indicator):
     def __init__(self, camera, flatsh, matsh, dataobj, attr, indmax=1, indmin=0, x=0, y=0, z=3, 
                  width=20, length=100, orientation="V",
                  line_colour=(255,255,255,255), fill_colour=(0,0,0,255), line_thickness = 1, 
-                 needle_img="default_needle.img", phase=0):
+                 needle_img="default_needle.jpg", phase=0): #default_needle.img
         '''
         *width* width of the indicator
         *length* length of the indicator
@@ -62,8 +62,16 @@ class LinearIndicator(Indicator):
         self.y = y
         self.z = z
         
-        
-        self.bezel = Box2d(camera=self.camera, w=self.width, h=self.length, d=1.0,
+        if(orientation=="H"):
+            width = self.length
+            height = self.width
+            rot = 90
+        else:
+            width = self.width
+            height = self.length
+            rot = 0
+            
+        self.bezel = Box2d(camera=self.camera, w=width, h=height, d=1.0,
                          x=self.x, y=self.y, z=self.z,
                          line_colour=self.line_colour, fill_colour=self.fill_colour, 
                          line_thickness=self.line_thickness,  shader=matsh, justify='C')
@@ -72,13 +80,23 @@ class LinearIndicator(Indicator):
         
         self.needle = pi3d.ImageSprite(camera=self.camera, texture=self.needle_texture, shader=flatsh, 
                                        w=self.needle_texture.ix, h=self.needle_texture.iy, 
-                                       x=self.x, y=self.y, z=0.5, name="needle")
+                                       x=self.x, y=self.y, z=0.5, rz=rot, name="needle")
         
     def gen_item(self):
         self.value = getattr(self.dataobj, self.attr, None)
         indrange = float(self.indmax - self.indmin)
         deltapos = (( float(self.value - self.indmin) / indrange) * self.length) - (self.length * 0.5)
-        self.needle.positionY(self.y + deltapos)
+
+        #limit travel to meter endpoints
+        if(deltapos > (self.length * 0.5)):
+            deltapos = (self.length * 0.5)
+        elif(deltapos < (self.length * -0.5)):
+            deltapos = (self.length * -0.5)
+
+        if(self.orientation == "H"):
+            self.needle.positionX(self.x + deltapos)
+        else:
+            self.needle.positionY(self.y + deltapos)
         self.changed = True
         
         
