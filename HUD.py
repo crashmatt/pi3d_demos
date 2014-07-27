@@ -17,6 +17,7 @@ from LayerItems import LayerVarText
 from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
+from LayerItems import LayerDynamicShape
 from ScreenGrid import ScreenScale
 
 from Indicator import LinearIndicator
@@ -109,7 +110,7 @@ class HUD(object):
         self.VSI = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "vertical_speed", 
                                    indmax=200, indmin=-200, x=x, y=y, z=3, width=15, length=200, 
                                    orientation="V", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.5), 
-                                   line_thickness = 2, needle_img="default_needle.img")
+                                   line_thickness = 2, needle_img="/home/matt/pi/demos/default_needle.img")
 
         print("start creating ladder")
         self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
@@ -154,7 +155,7 @@ class HUD(object):
                                                  text="{:03.0f}", dataobj=self,  attr="tas", digits=4, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
         
-        self.dynamic_items.add_item( LayerShape(self.VSI.needle) )
+        self.dynamic_items.add_item( LayerDynamicShape(self.VSI, phase=0) )
 
 
 
@@ -296,7 +297,7 @@ class HUD(object):
             self.update()
         self.store_hud_config()
         quit()
-
+        
 
     def update(self):
         frametime = 1 / self.av_fps
@@ -306,6 +307,7 @@ class HUD(object):
         self.heading += self.heading_rate * frametime
         self.tas += self.aspd_rate * frametime
         self.ias += self.aspd_rate * frametime
+        self.vertical_speed =  random.randrange(-200, 200, 1)
         
         # Temporary
         if(self.pitch > 70):

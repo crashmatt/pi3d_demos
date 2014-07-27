@@ -142,6 +142,20 @@ class LayerShape(LayerItem):
     def draw_item(self):
         self.drwshape.draw()
         self.changed = False
+                
+class LayerDynamicShape(LayerItem):
+    def __init__(self, drwshape, phase=None):
+        super(LayerDynamicShape, self).__init__(self, phase=phase)
+
+        self.drwshape = drwshape
+        self.changed = True
+    
+    def gen_item(self):
+        self.drwshape.gen_item()
+    
+    def draw_item(self):
+        self.drwshape.draw()
+        self.changed = False
         
 
 class Layers(object):

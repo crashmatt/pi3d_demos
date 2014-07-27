@@ -24,11 +24,11 @@ class Indicator(LayerItem):
         self.dataobj = dataobj
         self.attr = attr
         
-        self.max = indmax
-        self.min = indmin
+        self.indmax = indmax
+        self.indmin = indmin
         self.y = z
         
-        self.value = getattr(dataobj, attr, None)
+        self.value = getattr(self.dataobj, self.attr, None)
         self.bezel=None
                 
     def draw_bezel(self):
@@ -74,5 +74,14 @@ class LinearIndicator(Indicator):
                                        w=self.needle_texture.ix, h=self.needle_texture.iy, 
                                        x=self.x, y=self.y, z=0.5, name="needle")
         
-    def draw_item(self):
+    def gen_item(self):
+        self.value = getattr(self.dataobj, self.attr, None)
+        indrange = float(self.indmax - self.indmin)
+        deltapos = (( float(self.value - self.indmin) / indrange) * self.length) - (self.length * 0.5)
+        self.needle.positionY(self.y + deltapos)
+        self.changed = True
+        
+        
+    def draw(self):
         self.needle.draw()
+        self.changed = False
