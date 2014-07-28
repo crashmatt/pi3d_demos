@@ -25,6 +25,7 @@ from Indicator import LinearIndicator
 from Box2d import Box2d
 
 import HUDConfig as HUDConfig
+import os
 
 print("=====================================================")
 print("press escape to escape")
@@ -36,7 +37,9 @@ print("=====================================================")
 class HUD(object):
     def __init__(self):
 
-        
+        self.working_directory = os.getcwd()
+        print("Working directory = " + self.working_directory)
+               
         self.hud_update_frames = 4
         
         self.layer_text_spacing = 16
@@ -50,7 +53,7 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = 5
+        self.pitch_rate = -2
         self.roll_rate = 3
         self.heading_rate = 15
         self.track_rate = 1
@@ -106,18 +109,22 @@ class HUD(object):
         self.textFont = self.hudFont
 
         print("end creating fonts")
+        
+        #Explicit working directory path done so that profiling works correctly. Don't know why. It just is.
+        needle_path = os.path.abspath(os.path.join(self.working_directory, 'default_needle.img'))
 
         x,y = self.grid.get_grid_pixel(14, 0)
         self.VSI = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "vertical_speed", 
-                                   indmax=200, indmin=-200, x=x, y=y, z=3, width=20, length=180, 
+                                   indmax=200, indmin=-200, x=x, y=y, z=3, width=18, length=180, 
                                    orientation="V", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.5), 
-                                   line_thickness = 2, needle_img="/home/matt/pi/demos/default_needle.img")
+                                   line_thickness = 1, needle_img=needle_path)
 
+        #Add slip indicator.  Scale is in degrees
         x,y = self.grid.get_grid_pixel(0, -6)
         self.slip_indicator = LinearIndicator(self.text_camera, self.flatsh, self.matsh, self, "slip", 
-                                              indmax=0.1, indmin=-0.1, x=x, y=y, z=3, width=25, length=250, 
+                                              indmax=5, indmin=-5, x=x, y=y, z=3, width=21, length=250, 
                                               orientation="H", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.75), 
-                                              line_thickness = 2, needle_img="/home/matt/pi/demos/default_needle.img")
+                                              line_thickness = 1, needle_img=needle_path)
 
         print("start creating ladder")
         self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
@@ -310,7 +317,7 @@ class HUD(object):
         self.tas += self.aspd_rate * frametime
         self.ias += self.aspd_rate * frametime
         self.vertical_speed =  random.randrange(-200, 200, 1)
-        self.slip = float(random.randrange(-10,10)) * 0.01
+        self.slip = float(random.randrange(-50,50)) * 0.1
         
         
         # Temporary
