@@ -3,6 +3,7 @@ Created on 23 Jul 2014
 
 @author: matt
 '''
+import ConfigParser
 
 class HUDConfig(object):
     '''

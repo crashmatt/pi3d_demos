@@ -163,7 +163,7 @@ class HUDladderBar(object):
             return 2
         
     def get_bar_gap(self):
-        return 0.03
+        return 0.06
     
     def get_font_size(self):
         if(self.degree == 0):
@@ -172,7 +172,7 @@ class HUDladderBar(object):
             return 0.125
     
     def get_font_bar_gap(self):
-        return 0.05
+        return 0.03
     
     def get_bar_pattern(self):
         """ return a tuple (gaps, gap_size) describing line pattern"""

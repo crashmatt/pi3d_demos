@@ -1,19 +1,14 @@
 #!/usr/bin/python
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from pi3d.util.OffScreenTexture import OffScreenTexture
 
-import math, random, time, glob, string, pickle
-
-import ConfigParser
+import math, random, time, string
 
 #import demo
 import pi3d
 
-import numeric
 from HUDladder import HUDladder
 from LayerItems import LayerText
-from LayerItems import LayerVarText
 from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
