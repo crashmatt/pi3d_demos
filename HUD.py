@@ -73,7 +73,7 @@ class HUD(object):
         """ Initialise the HUD graphics """
 
 # Setup display and initialise pi3d
-        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=576, h=480, frames_per_second=self.fps)  #w=640
+        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=640, h=480, frames_per_second=self.fps)
         self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
         
         self.grid = ScreenScale(0.025,0.075)
