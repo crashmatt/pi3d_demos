@@ -26,7 +26,7 @@ class Indicator(LayerItem):
         
         self.indmax = indmax
         self.indmin = indmin
-        self.y = z
+        self.z = z
         
         self.value = getattr(self.dataobj, self.attr, None)
         self.bezel=None
@@ -103,3 +103,36 @@ class LinearIndicator(Indicator):
     def draw(self):
         self.needle.draw()
         self.changed = False
+        
+class DirectionIndicator(Indicator):
+    def __init__(self, camera, flatsh, matsh, dataobj, attr, x=0, y=0, z=3,
+                 pointer_img="default_pointer.jpg", phase=0):
+        
+        super(DirectionIndicator, self).__init__(dataobj, attr, x=x, y=y, phase=phase, indmax=360, indmin=0, z=z, camera=camera, shader=matsh )
+
+        self.pointer_texture =  pi3d.Texture(pointer_img)
+        
+        self.pointer = pi3d.ImageSprite(camera=self.camera, texture=self.pointer_texture, shader=flatsh, 
+                                       w=self.pointer_texture.ix, h=self.pointer_texture.iy, 
+                                       x=self.x, y=self.y, z=0.5, name="pointer")
+        
+    def gen_item(self):
+        self.value = getattr(self.dataobj, self.attr, None)
+        indrange = float(self.indmax - self.indmin)
+        
+        #limit travel to meter endpoints
+#        if(deltapos > (self.length * 0.5)):
+#            deltapos = (self.length * 0.5)
+#        elif(deltapos < (self.length * -0.5)):
+#            deltapos = (self.length * -0.5)
+
+        self.pointer.rotateToZ(self.value)
+        self.changed = True
+        
+    def draw_item(self):
+        self.draw()
+        
+    def draw(self):
+        self.pointer.draw()
+        self.changed = False
+        

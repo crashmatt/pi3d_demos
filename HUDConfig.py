@@ -20,4 +20,9 @@ class HUDConfig(object):
     def get_layers(self):
         return self.layers
     
-    
+    def store_hud_config(self):
+        config = ConfigParser.ConfigParser()
+        config.add_section("static_layer")
+        
+        with open('hud.cfg', 'wb') as configfile:
+            config.write(configfile)    

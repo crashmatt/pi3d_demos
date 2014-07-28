@@ -9,6 +9,7 @@ import pi3d
 
 from HUDladder import HUDladder
 from LayerItems import LayerText
+from LayerItems import LayerVarText
 from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
@@ -16,6 +17,7 @@ from LayerItems import LayerDynamicShape
 from ScreenGrid import ScreenScale
 
 from Indicator import LinearIndicator
+from Indicator import DirectionIndicator
 
 from Box2d import Box2d
 
@@ -24,7 +26,6 @@ import os
 
 print("=====================================================")
 print("press escape to escape")
-print("move this terminal window to top of screen to see FPS")
 print("=====================================================")
 
 
@@ -37,7 +38,7 @@ class HUD(object):
                
         self.hud_update_frames = 4
         
-        self.layer_text_spacing = 16
+        self.layer_text_spacing = 14
         
         self.fps = 25
         
@@ -59,6 +60,7 @@ class HUD(object):
         self.groundspeed = 110
         self.windspeed = 15
         self.heading = 221
+        self.home = 120
         self.vertical_speed = -3.12
         self.asl = 1024             #altitude above sea level
         self.agl = 880              #altitude above ground level
@@ -148,20 +150,25 @@ class HUD(object):
 #        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
 #                                                 text="{:+03.0f}", dataobj=self,  attr="roll", digits=4, phase=0,
 #                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
-        
-        x,y = self.grid.get_grid_pixel(0, 6)
+        # Heading number
+        x,y = self.grid.get_grid_pixel(3, 5)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='C') )
 
-        x,y = self.grid.get_grid_pixel(18, 5)
+        x,y = self.grid.get_grid_pixel(14, 5)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
-                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
-
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
+        # True airspeed number
         x,y = self.grid.get_grid_pixel(-19, 5)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
-                                                 text="{:03.0f}", dataobj=self,  attr="tas", digits=4, phase=0,
+                                                 text="{:03.0f}", dataobj=self,  attr="tas", digits=3, phase=0,
+                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
+
+        x,y = self.grid.get_grid_pixel(-19, 4)
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+                                                 text="{:03.0f}", dataobj=self,  attr="groundspeed", digits=3, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
 
         x,y = self.grid.get_grid_pixel(13, 3)
@@ -173,10 +180,21 @@ class HUD(object):
         
         self.dynamic_items.add_item( LayerDynamicShape(self.slip_indicator, phase=0) )
         
+                #Explicit working directory path done so that profiling works correctly. Don't know why. It just is.
+        pointer_path = os.path.abspath(os.path.join(self.working_directory, 'default_pointer.png'))
+        
+        #heading pointer
+        x,y = self.grid.get_grid_pixel(7, 5)
+        self.dynamic_items.add_item( DirectionIndicator(text_camera, self.flatsh, self.matsh, dataobj=self, attr="heading", 
+                                                        x=x, y=y, z=3, pointer_img=pointer_path, phase=2) )
+        #Home pointer
+        x,y = self.grid.get_grid_pixel(-7, 5)
+        self.dynamic_items.add_item( DirectionIndicator(text_camera, self.flatsh, self.matsh, dataobj=self, attr="home", 
+                                                        x=x, y=y, z=3, pointer_img=pointer_path, phase=2) )
 
 
         self.static_items = LayerItems()
-        #First item with matsh to make it work.  Don't know why.  It just is.
+        #First item with matsh to make it work.  Don't know why.  It just is. But maybe not anymore!
         
         x,y = self.grid.get_grid_pixel(19, 5)   
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
@@ -187,7 +205,8 @@ class HUD(object):
         self.static_items.add_item( LayerShape(self.slip_indicator.bezel) )
         
 
-        x,y = self.grid.get_grid_pixel(0, 6)
+        #Heading text box
+        x,y = self.grid.get_grid_pixel(3, 5)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
                                                      line_colour=(0,255,0,0.75), fill_colour=(0,0,0,2),
                                                      w=layer_text_spacing*3.5, h=25, x=x+5, y=y, z=6, 
@@ -195,14 +214,25 @@ class HUD(object):
 
         x,y = self.grid.get_grid_pixel(12, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="AGL", x=x, y=y, size=0.1) )
+                                              text="agl", x=x, y=y, size=0.1) )
         
-        
-        x,y = self.grid.get_grid_pixel(-12, 5)
+        #True airspeed label
+        x,y = self.grid.get_grid_pixel(-14, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="TAS", x=x, y=y, size=0.1) )
+                                              text="tas", x=x, y=y, size=0.1) )
+
+        #groundspeed label
+        x,y = self.grid.get_grid_pixel(-14, 4)
+        self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
+                                              text="gspd", x=x, y=y, size=0.1) )
         
-        x,y = self.grid.get_grid_pixel(-18, 5)
+        # True airspeed text box
+        x,y = self.grid.get_grid_pixel(-19, 5)
+        self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
+                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
+                                                     w=120, h=25, x=x, y=y, z=6, line_thickness=1, justify='R')) )
+        # Groundspeed text box
+        x,y = self.grid.get_grid_pixel(-19, 4)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
                                                      w=120, h=25, x=x, y=y, z=6, line_thickness=1, justify='R')) )
@@ -210,14 +240,15 @@ class HUD(object):
 
 
         self.status_items = LayerItems()
-        #First item with matsh to make it work.  Don't know why.  It just is.
-        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=matsh, 
-                                              text=" ", x=1.0, y=1.0, size=0.125, phase=0) )
+#        #First item with matsh to make it work.  Don't know why.  It just is.
+#        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=matsh, 
+#                                              text=" ", x=1.0, y=1.0, size=0.125, phase=0) )
         x,y = self.grid.get_grid_pixel(0, 6)
         self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
                                               text="MODE", x=x, y=y, size=0.1, phase = 1) )
         
-#        self.status_items.add_item( LayerVarText(hudFont, text="{:+1.1f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, xpos=0.0, ypos=0.2, size=0.125, phase = 2) )
+#        x,y = self.grid.get_grid_pixel(0, 6)
+#        self.status_items.add_item( LayerVarText(hudFont, text="{:+2.0f}", dataobj=self, attr="pitch", camera=text_camera, shader=flatsh, x=x, y=y, z=0.5, size=0.125, phase=None) )
 
         print("finished creating layers")
 
@@ -249,7 +280,7 @@ class HUD(object):
                 self.dynamic_items.draw_items()
                 self.dataLayer.end_layer()                 # stop drawing on the text layer    
             elif(self.hud_update_frame == 3):
-                if(self.status_items.gen_items(self.hud_update_frame)):
+                if(self.status_items.gen_items(phase=None)):
                     self.statusLayer.start_layer()
                     self.status_items.draw_items()
                     self.statusLayer.end_layer()
@@ -299,11 +330,12 @@ class HUD(object):
                 break
 
             self.update()
-        self.store_hud_config()
         quit()
-        
 
     def update(self):
+        self.simulate()
+        
+    def simulate(self):
         frametime = 1 / self.av_fps
         self.pitch += self.pitch_rate * frametime
         self.roll += self.roll_rate * frametime
@@ -313,13 +345,13 @@ class HUD(object):
         self.ias += self.aspd_rate * frametime
         self.vertical_speed =  random.randrange(-200, 200, 1)
         self.slip = float(random.randrange(-50,50)) * 0.1
-        
+        self.home += self.heading_rate * frametime
         
         # Temporary
         if(self.pitch > 70):
             self.pitch -= 140
-        elif(self.pitch < -360):
-            self.pitch += 360
+        elif(self.pitch < -70):
+            self.pitch += 140
         
         if(self.roll > 360):
             self.roll -= 360
@@ -331,12 +363,12 @@ class HUD(object):
         elif(self.heading < 0):
             self.heading -= 360
             
-    def store_hud_config(self):
-        config = ConfigParser.ConfigParser()
-        config.add_section("static_layer")
-        
-        with open('hud.cfg', 'wb') as configfile:
-            config.write(configfile)
+        if(self.home > 360):
+            self.home -= 360
+        elif(self.home < 0):
+            self.home -= 360
+            
+
     
 hud=HUD()
 hud.init_run()
