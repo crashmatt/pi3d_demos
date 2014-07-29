@@ -50,8 +50,8 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = 15
-        self.roll_rate = 10
+        self.pitch_rate = 10
+        self.roll_rate = 5
         self.heading_rate = 15
         self.track_rate = 1
         self.track = 325

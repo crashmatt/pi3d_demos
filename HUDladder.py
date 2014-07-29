@@ -46,6 +46,8 @@ class HUDladder(object):
         self.font_bar_gap = 0.07        # ratio of screen width
         self.alpha = 2                # 0 to 255
         self.maxDegrees = 80
+        self.fadingpos_start = 0.3
+        self.fadingpos_end = 0.4
         
 
         # 2d camera for generating sprites
@@ -103,10 +105,20 @@ class HUDladder(object):
             self.camera2d.reset()
             self.camera2d.rotateZ(roll)
             self.camera2d.position((0,ypos,0))
-
+            
             for bar in self.bars:
                 if(bar.degree < highpitch) and (bar.degree > lowpitch):
-                    bar.draw_bar(self.camera2d, alpha=self.alpha)
+                    screenpos = (bar.degree - pitch) * self.screenstep / self.degstep
+                    if(screenpos < 0):
+                        screenpos = -screenpos
+                    if(screenpos < self.fadingpos_start):
+                        fade = self.alpha
+                    elif(screenpos > self.fadingpos_end):
+                        fade = 0
+                    else:
+                        fade = self.alpha * (screenpos - self.fadingpos_end) / (self.fadingpos_start - self.fadingpos_end) 
+                        
+                    bar.draw_bar(self.camera2d, alpha=fade)
                     
     def draw_center(self):
         self.center.draw()
