@@ -76,6 +76,9 @@ class HUD(object):
         self.DISPLAY = pi3d.Display.create(x=0, y=0, w=640, h=480, frames_per_second=self.fps)
         self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
         
+        self.background_colour=(0,0,0,255)
+        self.background_distance=2000
+        
         self.grid = ScreenScale(0.025,0.075)
 
         self.fpv_camera = pi3d.Camera.instance()
@@ -107,6 +110,7 @@ class HUD(object):
 
         print("end creating fonts")
         
+        print("start creating indicators")
         #Explicit working directory path done so that profiling works correctly. Don't know why. It just is.
         needle_path = os.path.abspath(os.path.join(self.working_directory, 'default_needle.img'))
 
@@ -122,15 +126,19 @@ class HUD(object):
                                               indmax=5, indmin=-5, x=x, y=y, z=3, width=21, length=250, 
                                               orientation="H", line_colour=(255,255,255,255), fill_colour=(0,0,0,0.75), 
                                               line_thickness = 1, needle_img=needle_path)
+        print("end creating indicators")
+
 
         print("start creating ladder")
         self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
         print("end creating ladder")
 
+        self.background = pi3d.Plane(w=self.DISPLAY.width, h=self.DISPLAY.height, z=self.background_distance,
+                                camera=self.hud_camera, name="background", )
+        self.background.set_draw_details(self.matsh, [], 0, 0)
+        self.background.set_material(self.background_colour)
 
         print("start creating layers")
-
-#digitsmap =
 
         text_camera = self.text_camera
         textFont = self.textFont
@@ -155,8 +163,8 @@ class HUD(object):
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='C') )
-
-        x,y = self.grid.get_grid_pixel(14, 5)
+        # Altitude above ground
+        x,y = self.grid.get_grid_pixel(15, 5)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
@@ -166,11 +174,13 @@ class HUD(object):
                                                  text="{:03.0f}", dataobj=self,  attr="tas", digits=3, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
 
+        #Groundspeed
         x,y = self.grid.get_grid_pixel(-19, 4)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:03.0f}", dataobj=self,  attr="groundspeed", digits=3, phase=0,
                                                   x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='R') )
 
+        #Vertical speed
         x,y = self.grid.get_grid_pixel(13, 3)
         self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
                                                  text="{:+03.0f}", dataobj=self,  attr="vertical_speed", digits=4, phase=0,
@@ -212,7 +222,8 @@ class HUD(object):
                                                      w=layer_text_spacing*3.5, h=25, x=x+5, y=y, z=6, 
                                                      line_thickness=1, justify='C')) )
 
-        x,y = self.grid.get_grid_pixel(12, 5)
+        #AGL text box
+        x,y = self.grid.get_grid_pixel(13, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="agl", x=x, y=y, size=0.1) )
         
@@ -298,6 +309,7 @@ class HUD(object):
       
 # try glScissor for limiting extent of ladder drawing
 
+            self.background.draw()
             self.ladder.draw_ladder(self.roll, self.pitch, 0)
 
             self.dataLayer.draw_layer()
