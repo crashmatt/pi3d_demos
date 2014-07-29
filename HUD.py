@@ -84,7 +84,7 @@ class HUD(object):
         """ Initialise the HUD graphics """
 
 # Setup display and initialise pi3d
-        self.DISPLAY = pi3d.Display.create(x=0, y=0, w=640, h=480, frames_per_second=self.fps)
+        self.DISPLAY = pi3d.Display.create(x=20, y=0, w=700, h=580, frames_per_second=self.fps)
         self.DISPLAY.set_background(0.0, 0.0, 0.0, 0)      # r,g,b,alpha
         
         self.background_colour=(0,0,0,255)
@@ -224,10 +224,11 @@ class HUD(object):
         self.static_items = LayerItems()
         #First item with matsh to make it work.  Don't know why.  It just is. But maybe not anymore!
         
+        #AGL text box
         x,y = self.grid.get_grid_pixel(19, 5)   
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
                                                      line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75), 
-                                                     w=layer_text_spacing*8, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
+                                                     w=layer_text_spacing*8.5, h=25, x=x, y=y, z=6, line_thickness=1, justify='L')) )
         
         self.static_items.add_item( LayerShape(self.VSI.bezel) )
         self.static_items.add_item( LayerShape(self.slip_indicator.bezel) )
@@ -247,7 +248,7 @@ class HUD(object):
                                                      w=layer_text_spacing*8, h=25, x=x-5, y=y, z=6, 
                                                      line_thickness=1, justify='C')) )
 
-        #AGL text box
+        #AGL label
         x,y = self.grid.get_grid_pixel(13, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
                                               text="agl", x=x, y=y, size=0.1) )
