@@ -24,6 +24,8 @@ from Box2d import Box2d
 
 import HUDConfig as HUDConfig
 import os
+import Queue
+
 
 print("=====================================================")
 print("press escape to escape")
@@ -32,7 +34,7 @@ print("=====================================================")
 
 
 class HUD(object):
-    def __init__(self):
+    def __init__(self, simulate=False):
 
         self.working_directory = os.getcwd()
         print("Working directory = " + self.working_directory)
@@ -42,6 +44,7 @@ class HUD(object):
         self.layer_text_spacing = 14
         
         self.fps = 20
+        self.simulate = simulate
         
         self.init_vars()
         self.init_graphics()
@@ -69,8 +72,11 @@ class HUD(object):
         self.asl = 1024             #altitude above sea level
         self.agl = 880              #altitude above ground level
         self.ahl = 880              #altitude above home level
-        self.slip = 0
+        self.slip = 0               #slip in degrees
         self.mode = "FBW"
+        
+        #Queue of attribute updates each of which is tuple (attrib, object)
+        self.update_queue = Queue.Queue(100)
         
 #        self.climb_rate = 2.24
         
@@ -374,7 +380,15 @@ class HUD(object):
         quit()
 
     def update(self):
-        self.simulate()
+        if self.simulate:
+            self.run_sim()
+        
+        while not self.update_queue.empty():
+            var_update = self.update_queue.get_nowait()
+            if hasattr(self, var_update[0]):
+                setattr(self, var_update[1])
+            self.update_queue.task_done()
+                
         self.home_dist_scale()
     
     def home_dist_scale(self):
@@ -390,7 +404,7 @@ class HUD(object):
             self.home_dist_units = "m"
             self.home_distance_number.textformat = "{:03.0f}"
         
-    def simulate(self):
+    def run_sim(self):
         frametime = 1 / self.av_fps
         self.pitch += self.pitch_rate * frametime
         self.roll += self.roll_rate * frametime
@@ -426,7 +440,5 @@ class HUD(object):
             self.home -= 360
             
 
-    
-hud=HUD()
-hud.init_run()
+hud=HUD(True)
 hud.run_hud()
