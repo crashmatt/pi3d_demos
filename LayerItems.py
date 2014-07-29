@@ -69,17 +69,17 @@ class LayerText(LayerItem):
         
     def _gen_text(self):
         if self.text != self.last_text:
-            self.text = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify='C')
-            self.text.position(self.x, self.y, 5)
-            self.text.set_material((0,0,0,0))
-            self.text.set_alpha(self.alpha)
-            self.text.set_shader(self.shader)
+            self.text_str = pi3d.String(string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify='C')
+            self.text_str.position(self.x, self.y, 5)
+            self.text_str.set_material((0,0,0,0))
+            self.text_str.set_alpha(self.alpha)
+            self.text_str.set_shader(self.shader)
             self.last_text = self.text
             self.changed = True
         
     def draw_item(self):
-        if self.text != None:
-            self.text.draw()
+        if self.text_str != None:
+            self.text_str.draw()
             self.changed = False
 
     def gen_item(self):

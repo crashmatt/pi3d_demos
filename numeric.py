@@ -48,19 +48,22 @@ class FastNumber(object):
 
     def set_number(self, text):
         pos = 0
-        textlen = len(text) 
-        for i in xrange(0,self.num_digits-textlen):
-            self.digits[pos].set_digit(" ")
-            pos += 1
+        textlen = len(text)
+        try:
+            for i in xrange(0,self.num_digits-textlen):
+                self.digits[pos].set_digit(" ")
+                pos += 1
+                
+            pos =  self.num_digits-textlen
+    #No check for excess text length       
+    #        if(textlen > self.num_shown_digits):
             
-        pos =  self.num_digits-textlen
-#No check for excess text length       
-#        if(textlen > self.num_shown_digits):
-        
-        for numchar in text:
-            digit = self.digits[pos]
-            digit.set_digit(numchar)
-            pos += 1
+            for numchar in text:
+                digit = self.digits[pos]
+                digit.set_digit(numchar)
+                pos += 1
+        except:
+            print("did not fit text {:s} in length {:d}", text, self.num_digits)
 
     def draw(self):
         for digit in self.digits:
