@@ -14,6 +14,7 @@ from LayerItems import LayerItems
 from LayerItems import LayerNumeric
 from LayerItems import LayerShape
 from LayerItems import LayerDynamicShape
+from LayerItems import LayerStringList
 from ScreenGrid import ScreenScale
 
 from Indicator import LinearIndicator
@@ -36,7 +37,7 @@ class HUD(object):
         self.working_directory = os.getcwd()
         print("Working directory = " + self.working_directory)
                
-        self.hud_update_frames = 4
+        self.hud_update_frames = 5
         
         self.layer_text_spacing = 14
         
@@ -49,8 +50,8 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = -2
-        self.roll_rate = 3
+        self.pitch_rate = 15
+        self.roll_rate = 10
         self.heading_rate = 15
         self.track_rate = 1
         self.track = 325
@@ -69,6 +70,7 @@ class HUD(object):
         self.agl = 880              #altitude above ground level
         self.ahl = 880              #altitude above home level
         self.slip = 0
+        self.mode = "FBW"
         
 #        self.climb_rate = 2.24
         
@@ -271,9 +273,18 @@ class HUD(object):
 #        #First item with matsh to make it work.  Don't know why.  It just is.
 #        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=matsh, 
 #                                              text=" ", x=1.0, y=1.0, size=0.125, phase=0) )
+#        x,y = self.grid.get_grid_pixel(0, 6)
+#        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
+#                                              text="MODE", x=x, y=y, size=0.1, phase = 1) )
+        
+        #Mode status using list of text strings
         x,y = self.grid.get_grid_pixel(0, 6)
-        self.status_items.add_item( LayerText(hudFont, camera=text_camera, shader=flatsh, 
-                                              text="MODE", x=x, y=y, size=0.1, phase = 1) )
+        text_strings = ["MANUAL", "AUTO", "FBW", "STABILIZE", "RTL"]
+#        string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify='C'       
+        strList = LayerStringList(hudFont, text_strings=text_strings, text_format="Mode: {:s}", 
+                                  camera=text_camera, dataobj=self, attr="mode", shader=flatsh,
+                                  x=x, y=y, z=1, size=0.125, justify='C')
+        self.status_items.add_item(strList)
         
         # Home distance units
         x,y = self.grid.get_grid_pixel(-1, 5)

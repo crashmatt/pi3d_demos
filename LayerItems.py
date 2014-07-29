@@ -107,7 +107,57 @@ class LayerVarText(LayerText):
         else:
             self.text = " "
         self._gen_text()
+
+
+class LayerStringList(LayerVarText):
+    """ prerenders a list of strings for display"""
+    
+    def __init__(self, font, text_format, text_strings, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, z=1, alpha=1, justify='C'):
+        """ *text_Strings* array of strings """
+        self.attr = attr
+        self.dataobj = dataobj
         
+        super(LayerStringList, self).__init__(font, text_format, camera, dataobj=dataobj, attr=attr, shader=shader, x=x, y=y, size=size, phase=phase, z=z, alpha=alpha)
+
+        self.text_strings = []
+        for txt in text_strings:
+            formatted_text = self.textformat.format(txt)
+            pi3dstr = pi3d.String(string=formatted_text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify=justify) 
+#            pi3dstr = pi3d.String(string=formatted_text, camera=self.camera, font=self.font, is_3d=False, size=self.size, justify='C') 
+
+            pi3dstr.set_material((0,0,0,0))
+            pi3dstr.set_alpha(self.alpha)
+            pi3dstr.set_shader(self.shader)
+            self.text_strings.append((txt, pi3dstr))
+        self.text = ""
+        self.selected_string = None
+
+
+    def gen_item(self):
+        if(self.attr != None) and (self.dataobj != None):
+            value = getattr(self.dataobj, self.attr, None)
+        else:
+            value = None
+        
+        if(value != None):
+            self.text = value
+        else:
+            self.text = ""
+        self._gen_text()
+        
+        
+    def _gen_text(self):
+        if self.text != self.last_text:
+            for txt in self.text_strings:
+                if(txt[0] == self.text):
+                    self.selected_string = txt[1]
+            self.last_text = self.text
+            self.changed = True
+    
+    def draw_item(self):
+        if(self.selected_string is not None):
+            self.selected_string.draw()
+        self.changed = False
         
 class LayerNumeric(LayerVarText):
     def __init__(self, font, text, camera, dataobj=None, attr=None, shader=None, x=0, y=0, size=1.0, phase=None, digits=3, spacing=15, justify='R', z=1, alpha=1 ):
