@@ -7,6 +7,8 @@ import pi3d
 from pi3d.util.OffScreenTexture import OffScreenTexture
 import math
 import time
+from ScreenGrid import ScreenScale
+from Line2d import Line2d
 
 class HUDladder(object):
     '''
@@ -20,7 +22,7 @@ class HUDladder(object):
     part of the ladder since it does not move and it can be drawn on a static layer
     '''
 
-    def __init__(self, font, camera, shader):
+    def __init__(self, font, camera, shader, alpha=1.0):
         '''
         Constructor
         *camera* 2d camera for drawing ladder sprites
@@ -44,7 +46,7 @@ class HUDladder(object):
         self.bar_gap = 0.05             # ratio of screen width
         self.font_scale = 0.08          # relative to original font size
         self.font_bar_gap = 0.07        # ratio of screen width
-        self.alpha = 2                # 0 to 255
+        self.alpha = alpha              # 0 to 255?
         self.maxDegrees = 80
         self.fadingpos_start = 0.3
         self.fadingpos_end = 0.4
@@ -78,7 +80,7 @@ class HUDladder(object):
         self.inits_done = 0
         
         self.center = HUDLadderCenter(self.camera, self.matsh)
-        
+        self.roll_indicator = HUDLadderRollIndicator(self.camera, self.matsh)
 
     def _gen_ladder(self):
         """ Generate the ladder """
@@ -123,8 +125,8 @@ class HUDladder(object):
     def draw_center(self):
         self.center.draw()
         
-
-
+    def draw_roll_indicator(self):
+        self.roll_indicator.draw()
 
 
 
@@ -260,22 +262,56 @@ class HUDladderBar(object):
 
 
 class HUDLadderCenter(object):
-    def __init__(self, camera, matsh):
+    def __init__(self, camera, matsh, colour=(255,255,255,255)):
         self.camera = camera
         self.matsh = matsh
+        self.colour = colour
         
     def draw(self):
         bar_shape = pi3d.Plane(camera=self.camera,  w=3, h=20)
         bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
+        bar_shape.set_material(self.colour)
         bar_shape.position( 0,  10, 5)
         bar_shape.draw()
 
         bar_shape = pi3d.Plane(camera=self.camera,  w=120, h=3)
         bar_shape.set_draw_details(self.matsh, [], 0, 0)
-        bar_shape.set_material((128,128,128,255))
+        bar_shape.set_material(self.colour)
         bar_shape.position( 0,  0, 5)
         bar_shape.draw()
 
 
+class HUDLadderRollIndicator(object):
+    def __init__(self, camera, matsh, radius=0.3, line_thickness=2, line_colour=(255,255,255,255), max_angle=60, tick_angle=15, tick_len=0.025):
+        self.camera = camera
+        self.matsh = matsh
+        self.radius = radius
+        self.max_angle = max_angle
+        self.tick_angle = tick_angle
+        self.tick_len = tick_len
+        self.line_thickness = line_thickness
+        self.line_colour = line_colour
+        
+    def draw(self):
+        grid = ScreenScale(100,100)
+        points = []
+        (x,rad) = grid.pos_to_pixel(self.radius, self.radius)
+        (x,tlen) = grid.pos_to_pixel(self.tick_len, self.tick_len)
+        
+        ticks = int(self.max_angle / self.tick_angle)
+        for tick in xrange(-ticks, ticks+1):
+            angle = tick * self.tick_angle
+            ypos = -rad * math.cos(math.radians(angle))
+            xpos = rad * math.sin(math.radians(angle))
+            points.append((xpos, ypos))
+            
+            angle += math.pi * 0.5
+            typos = -tlen *  math.cos(math.radians(angle)) + ypos
+            txpos =  tlen *  math.sin(math.radians(angle)) + xpos
+            
+            tmark = Line2d(self.camera, self.matsh, ((xpos,ypos), (txpos, typos)), self.line_thickness)
+            tmark.draw()
+            
+        lines = Line2d(self.camera, self.matsh, points, self.line_thickness)
+        lines.draw()        
             

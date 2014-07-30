@@ -47,6 +47,7 @@ class HUD(object):
         self.text_box_height = 30
         
         self.text_alpha = 255
+        self.pitch_ladder_alpha =1.0
         
         self.fps = 20
         self.simulate = simulate
@@ -58,7 +59,7 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = 10
+        self.pitch_rate = 0.1
         self.roll_rate = 5
         self.heading_rate = 15
         self.track_rate = 1
@@ -146,7 +147,7 @@ class HUD(object):
 
 
         print("start creating ladder")
-        self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh)
+        self.ladder = HUDladder(font=self.hudFont, camera=self.hud_camera, shader=self.flatsh, alpha=self.pitch_ladder_alpha)
         print("end creating ladder")
 
         self.background = pi3d.Plane(w=self.DISPLAY.width, h=self.DISPLAY.height, z=self.background_distance,
@@ -350,6 +351,7 @@ class HUD(object):
                     self.staticLayer.start_layer()
                     self.static_items.draw_items()
                     self.ladder.draw_center()
+                    self.ladder.draw_roll_indicator()
                     self.staticLayer.end_layer()
 
             
