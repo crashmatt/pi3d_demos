@@ -47,7 +47,13 @@ class HUD(object):
         self.text_box_height = 30
         
         self.text_alpha = 255
-        self.pitch_ladder_alpha =1.0
+        self.label_alpha = 2
+        self.pitch_ladder_alpha = 1
+        self.pitch_ladder_text_alpha = 255
+        
+        self.hud_colour = (0,255,0,255)
+        self.textbox_line_colour = self.hud_colour
+        self.textbox_fill_colour = (0,0,0,0.75)
         
         self.fps = 20
         self.simulate = simulate
@@ -59,8 +65,8 @@ class HUD(object):
     def init_vars(self):
         self.pitch = 0
         self.roll = 0
-        self.pitch_rate = 0.1
-        self.roll_rate = 5
+        self.pitch_rate = 2
+        self.roll_rate = 1
         self.heading_rate = 15
         self.track_rate = 1
         self.track = 325
@@ -121,7 +127,7 @@ class HUD(object):
         print("start creating fonts")
         #fonts
         #hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
-        self.hudFont = pi3d.Font("fonts/FreeSansBold.ttf", (50,255,50,220))   #usr/share/fonts/truetype/freefont/
+        self.hudFont = pi3d.Font("fonts/FreeSansBold.ttf", self.hud_colour)   #usr/share/fonts/truetype/freefont/
         self.ladderFont = self.hudFont
         self.textFont = self.hudFont
 
@@ -233,7 +239,7 @@ class HUD(object):
         #AGL text box
         x,y = self.grid.get_grid_pixel(16, 5)   
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,255,0,0.7), fill_colour=(0,0,0,0.75), 
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour, 
                                                      w=layer_text_spacing*8, h=self.text_box_height, x=x-5, y=y, z=6, line_thickness=1, justify='C')) )
         
         self.static_items.add_item( LayerShape(self.VSI.bezel) )
@@ -243,47 +249,47 @@ class HUD(object):
         #Heading text box
         x,y = self.grid.get_grid_pixel(5, 5)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
-                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,2),
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour,
                                                      w=layer_text_spacing*3.5, h=self.text_box_height, x=x+5, y=y, z=6, 
                                                      line_thickness=1, justify='C')) )
 
         #Home distance text box
         x,y = self.grid.get_grid_pixel(-2, 5)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh,
-                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,2),
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour,
                                                      w=layer_text_spacing*8, h=self.text_box_height, x=x-5, y=y, z=6, 
                                                      line_thickness=1, justify='C')) )
 
         #AGL label
         x,y = self.grid.get_grid_pixel(13, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="agl", x=x, y=y, size=self.label_size) )
+                                              text="agl", x=x, y=y, size=self.label_size, alpha=self.label_alpha) )
         
         #True airspeed label
         x,y = self.grid.get_grid_pixel(-14, 5)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="tas", x=x, y=y, size=self.label_size) )
+                                              text="tas", x=x, y=y, size=self.label_size, alpha=self.label_alpha) )
 
         #groundspeed label
         x,y = self.grid.get_grid_pixel(-14, 4)
         self.static_items.add_item( LayerText(self.textFont, camera=self.text_camera, shader=self.flatsh, 
-                                              text="gspd", x=x, y=y, size=self.label_size) )
+                                              text="gspd", x=x, y=y, size=self.label_size, alpha=self.label_alpha) )
         
         # Climb rate text box
         x,y = self.grid.get_grid_pixel(13.5, 3)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour, 
                                                      w=layer_text_spacing*5, h=self.text_box_height, x=x, y=y, z=6, line_thickness=1, justify='C')) )
 
         # True airspeed text box
         x,y = self.grid.get_grid_pixel(-19, 5)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour, 
                                                      w=120, h=self.text_box_height, x=x, y=y, z=6, line_thickness=1, justify='R')) )
         # Groundspeed text box
         x,y = self.grid.get_grid_pixel(-19, 4)
         self.static_items.add_item( LayerShape(Box2d(camera=self.text_camera, shader=matsh, 
-                                                     line_colour=(0,255,0,0.75), fill_colour=(0,0,0,0.75), 
+                                                     line_colour=self.textbox_line_colour, fill_colour=self.textbox_fill_colour, 
                                                      w=120, h=self.text_box_height, x=x, y=y, z=6, line_thickness=1, justify='R')) )
 
 
