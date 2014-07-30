@@ -46,6 +46,8 @@ class HUD(object):
         self.layer_text_spacing = 16
         self.text_box_height = 30
         
+        self.text_alpha = 255
+        
         self.fps = 20
         self.simulate = simulate
         
@@ -174,36 +176,36 @@ class HUD(object):
 #                                                  x=x, y=y, size=0.125, spacing=layer_text_spacing, justify='L') )
         # Heading number
         x,y = self.grid.get_grid_pixel(5, 5)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:3.0f}", dataobj=self,  attr="heading", digits=3, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='C') )
         # Altitude above ground
         x,y = self.grid.get_grid_pixel(15, 5)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:+04.0f}", dataobj=self,  attr="agl", digits=4, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='R') )
         # True airspeed number
         x,y = self.grid.get_grid_pixel(-19, 5)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:03.0f}", dataobj=self,  attr="tas", digits=3, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='R') )
 
         # Home distance number
         x,y = self.grid.get_grid_pixel(-6, 5)
-        self.home_distance_number = LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.home_distance_number = LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:03.0f}", dataobj=self,  attr="home_dist_scaled", digits=4, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='R')
         self.dynamic_items.add_item( self.home_distance_number )
 
         #Groundspeed
         x,y = self.grid.get_grid_pixel(-19, 4)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:03.0f}", dataobj=self,  attr="groundspeed", digits=3, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='R') )
 
         #Vertical speed
         x,y = self.grid.get_grid_pixel(13, 3)
-        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, 
+        self.dynamic_items.add_item( LayerNumeric(camera=text_camera, font=textFont, shader=flatsh, alpha=self.text_alpha,
                                                  text="{:+03.0f}", dataobj=self,  attr="vertical_speed", digits=4, phase=0,
                                                   x=x, y=y, size=self.font_size, spacing=layer_text_spacing, justify='C') )
         
@@ -297,7 +299,7 @@ class HUD(object):
         x,y = self.grid.get_grid_pixel(0, 6)
         text_strings = ["MANUAL", "AUTO", "FBW", "STABILIZE", "RTL"]
 #        string=self.text, camera=self.camera, font=self.font, is_3d=False, x=self.x, y=self.y, z=self.z, size=self.size, justify='C'       
-        strList = LayerStringList(hudFont, text_strings=text_strings, text_format="Mode: {:s}", 
+        strList = LayerStringList(hudFont, text_strings=text_strings, text_format="Mode: {:s}", alpha=self.text_alpha,
                                   camera=text_camera, dataobj=self, attr="mode", shader=flatsh,
                                   x=x, y=y, z=1, size=self.font_size, justify='C')
         self.status_items.add_item(strList)
