@@ -170,9 +170,9 @@ class HUDladderBar(object):
     
     def get_bar_thickness(self):
         if(self.degree == 0):
-            return 3
+            return 4
         else:
-            return 2
+            return 3
         
     def get_bar_gap(self):
         return 0.06
@@ -265,13 +265,13 @@ class HUDLadderCenter(object):
         self.matsh = matsh
         
     def draw(self):
-        bar_shape = pi3d.Plane(camera=self.camera,  w=1, h=20)
+        bar_shape = pi3d.Plane(camera=self.camera,  w=3, h=20)
         bar_shape.set_draw_details(self.matsh, [], 0, 0)
         bar_shape.set_material((128,128,128,255))
         bar_shape.position( 0,  10, 5)
         bar_shape.draw()
 
-        bar_shape = pi3d.Plane(camera=self.camera,  w=100, h=1)
+        bar_shape = pi3d.Plane(camera=self.camera,  w=120, h=3)
         bar_shape.set_draw_details(self.matsh, [], 0, 0)
         bar_shape.set_material((128,128,128,255))
         bar_shape.position( 0,  0, 5)
