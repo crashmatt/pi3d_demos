@@ -40,7 +40,7 @@ class LinearIndicator(Indicator):
     def __init__(self, camera, flatsh, matsh, dataobj, attr, indmax=1, indmin=0, x=0, y=0, z=3, 
                  width=20, length=100, orientation="V",
                  line_colour=(255,255,255,255), fill_colour=(0,0,0,255), line_thickness = 1, 
-                 needle_img="default_needle.jpg", phase=0): #default_needle.img
+                 needle_img="default_needle.jpg", phase=0, tick_spacing=0.5): #default_needle.img
         '''
         *width* width of the indicator
         *length* length of the indicator
@@ -82,6 +82,20 @@ class LinearIndicator(Indicator):
                                        w=self.needle_texture.ix, h=self.needle_texture.iy, 
                                        x=self.x, y=self.y, z=0.5, rz=rot, name="needle")
         
+    def value_to_deltapos(self, value):
+        """ travel limited position on the indicator"""
+        indrange = float(self.indmax - self.indmin)
+        deltapos = (( float(self.value - self.indmin) / indrange) * self.length) - (self.length * 0.5)
+
+       #limit travel to meter endpoints
+        if(deltapos > (self.length * 0.5)):
+            deltapos = (self.length * 0.5)
+        elif(deltapos < (self.length * -0.5)):
+            deltapos = (self.length * -0.5)
+        
+        return deltapos
+
+        
     def gen_item(self):
         self.value = getattr(self.dataobj, self.attr, None)
         indrange = float(self.indmax - self.indmin)
@@ -103,6 +117,8 @@ class LinearIndicator(Indicator):
     def draw(self):
         self.needle.draw()
         self.changed = False
+        
+        
         
 class DirectionIndicator(Indicator):
     def __init__(self, camera, flatsh, matsh, dataobj, attr, x=0, y=0, z=3,

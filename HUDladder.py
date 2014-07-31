@@ -80,7 +80,7 @@ class HUDladder(object):
         self.inits_done = 0
         
         self.center = HUDLadderCenter(self.camera, self.matsh)
-        self.roll_indicator = HUDLadderRollIndicator(self.camera, self.matsh)
+        self.roll_indicator = HUDLadderRollIndicator(self.camera, self.matsh, line_thickness=3)
 
     def _gen_ladder(self):
         """ Generate the ladder """

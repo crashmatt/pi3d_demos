@@ -24,19 +24,21 @@ from Box2d import Box2d
 
 import HUDConfig as HUDConfig
 import os
-import Queue
+from multiprocessing import Queue
 
+#import pdb        pdb.set_trace()
+#import pydevd
 
-print("=====================================================")
-print("press escape to escape")
-print("=====================================================")
-
-
+standalone = False
 
 class HUD(object):
-    def __init__(self, simulate=False):
-
-        self.working_directory = os.getcwd()
+    def __init__(self, simulate=False, master=True, update_queue=None):
+        """
+        *simulate* = generate random simulation data to display
+        *master* Running as master and not a process
+        """
+#        self.working_directory = os.getcwd()
+        self.working_directory = os.path.dirname(os.path.realpath(__file__))
         print("Working directory = " + self.working_directory)
                
         self.hud_update_frames = 5
@@ -57,7 +59,11 @@ class HUD(object):
         
         self.fps = 20
         self.simulate = simulate
+        self.master = master
         
+        #Queue of attribute updates each of which is tuple (attrib, object)
+        self.update_queue = update_queue
+
         self.init_vars()
         self.init_graphics()
         self.init_run()
@@ -87,10 +93,12 @@ class HUD(object):
         self.slip = 0               #slip in degrees
         self.mode = "FBW"
         
-        #Queue of attribute updates each of which is tuple (attrib, object)
-        self.update_queue = Queue.Queue(100)
         
 #        self.climb_rate = 2.24
+
+#    def post_variable(self, varname, value):
+#        if(hasattr(self, varname)):
+#            self.update_queue.put_nowait((varname, value))
         
     def init_graphics(self):
         """ Initialise the HUD graphics """
@@ -127,7 +135,8 @@ class HUD(object):
         print("start creating fonts")
         #fonts
         #hudFont = pi3d.Font("fonts/FreeSans.ttf", (50,255,50,220))
-        self.hudFont = pi3d.Font("fonts/FreeSansBold.ttf", self.hud_colour)   #usr/share/fonts/truetype/freefont/
+        font_path = os.path.abspath(os.path.join(self.working_directory, 'fonts', 'FreeSansBold.ttf'))
+        self.hudFont = pi3d.Font(font_path, self.hud_colour)   #usr/share/fonts/truetype/freefont/
         self.ladderFont = self.hudFont
         self.textFont = self.hudFont
 
@@ -397,21 +406,30 @@ class HUD(object):
                 break
 
             self.update()
-        quit()
+        if(self.master):
+            quit()
 
     def update(self):
+        """" Per cycle update of all values"""
         if self.simulate:
             self.run_sim()
-        
-        while not self.update_queue.empty():
-            var_update = self.update_queue.get_nowait()
-            if hasattr(self, var_update[0]):
-                setattr(self, var_update[1])
-            self.update_queue.task_done()
-                
+    
+    
+        if(self.update_queue is not None):
+            while (self.update_queue.empty() == False):
+                var_update = self.update_queue.get_nowait()
+                if hasattr(self, var_update[0]):
+                    setattr(self, var_update[0], var_update[1])
+#                self.update_queue.task_done()
+        else:
+            pass
+#            print("queue does not exist")
+
         self.home_dist_scale()
+        
     
     def home_dist_scale(self):
+        """ Scale from home distance in meters to other scales depending on range"""
         if(self.home_dist >=1000):
             self.home_dist_scaled = self.home_dist * 0.001
             self.home_dist_units = "km"
@@ -459,6 +477,10 @@ class HUD(object):
         elif(self.home < 0):
             self.home -= 360
             
+if(standalone == True):
+    print("=====================================================")
+    print("press escape to escape")
+    print("=====================================================")
 
-hud=HUD(True)
-hud.run_hud()
+    hud=HUD(True)
+    hud.run_hud()
