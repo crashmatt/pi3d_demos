@@ -37,6 +37,8 @@ class HUD(object):
         *simulate* = generate random simulation data to display
         *master* Running as master and not a process
         """
+        self.quit = False
+        
 #        self.working_directory = os.getcwd()
         self.working_directory = os.path.dirname(os.path.realpath(__file__))
         print("Working directory = " + self.working_directory)
@@ -335,9 +337,9 @@ class HUD(object):
         self.spf = 1.0 # seconds per frame, i.e. water image change
         self.next_time = time.time() + self.spf
 
-        # Fetch key presses.
-        self.mykeys = pi3d.Keyboard()
-        #fr = 0
+        if self.master:
+            # Fetch key presses.
+            self.mykeys = pi3d.Keyboard()
 
         self.hud_update_frame = 0
         self.timestamp = time.clock()
@@ -392,22 +394,32 @@ class HUD(object):
             if(self.hud_update_frame > self.hud_update_frames):
                 self.hud_update_frame = 0
   
-
             #pi3d.screenshot("/media/E856-DA25/New/fr%03d.jpg" % fr)
   #          frameCount += 1
 
-            k = self.mykeys.read()
-            if k==27:
-                self.mykeys.close()
-                self.dataLayer.delete_buffers()
-                self.staticLayer.delete_buffers()
-                self.statusLayer.delete_buffers()
-                self.DISPLAY.destroy()
-                break
+            #If master then check for keyboard press to quit
+            if self.master:
+                # Fetch key presses.
+                self.mykeys = pi3d.Keyboard()
+                k = self.mykeys.read()
+                if k==27:
+                    self.mykeys.close()
+                    self.dataLayer.delete_buffers()
+                    self.staticLayer.delete_buffers()
+                    self.statusLayer.delete_buffers()
+                    self.DISPLAY.destroy()
+                    quit()
+                    break
+            #If lsave process then check for quit flag being set
+            else:
+                if self.quit:
+                    self.dataLayer.delete_buffers()
+                    self.staticLayer.delete_buffers()
+                    self.statusLayer.delete_buffers()
+                    self.DISPLAY.destroy()
 
             self.update()
-        if(self.master):
-            quit()
+            
 
     def update(self):
         """" Per cycle update of all values"""
