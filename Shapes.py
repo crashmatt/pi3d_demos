@@ -13,7 +13,7 @@ import demo
 # Load *all* the classes
 import pi3d
 # Load diplay, nearly full screen
-DISPLAY = pi3d.Display.create(x=20, y=20)
+DISPLAY = pi3d.Display.create(x=20, y=20, background=(0.0, 0.0, 0.1, 1.0))
 # Load shaders
 shader = pi3d.Shader("uv_light")
 shinesh = pi3d.Shader("uv_reflect")
@@ -25,6 +25,7 @@ patimg = pi3d.Texture("textures/PATRN.PNG")
 coffimg = pi3d.Texture("textures/COFFEE.PNG")
 shapebump = pi3d.Texture("textures/floor_nm.jpg")
 shapeshine = pi3d.Texture("textures/stars.jpg")
+light = pi3d.Light(lightpos=(-1.0, 0.0, 10.0), lightcol=(3.0, 3.0, 2.0), lightamb=(0.02, 0.01, 0.03), is_point=True)
 
 #Create inbuilt shapes
 mysphere = pi3d.Sphere(radius=1, sides=24, slices=24, name="sphere",
@@ -50,8 +51,9 @@ mycylinder = pi3d.Cylinder(radius=0.7, height=1.5, sides=24, name="Cyli",
         x=-2, y=-1, z=10)
 # NB Lathe needs to start at the top otherwise normals are calculated in reverse,
 # also inside surfaces need to be defined otherwise normals are wrong
-mylathe = pi3d.Lathe(path=((0,1),(0.6,1.2),(0.8,1.4),(1.09,1.7), (1.1,1.7),
-        (0.9, 1.4),(0.7,1.2),(0.08,1),(0.08,0.21),(0.1,0.2),(1,0.05),(1,0),(0,0)),
+mylathe = pi3d.Lathe(path=((0.0, 1.0), (0.6, 1.2), (0.8, 1.4), (1.09, 1.7),
+                      (1.1, 1.7), (0.9, 1.4), (0.7, 1.2), (0.08, 1), (0.08, 0.21),
+                      (0.1, 0.2), (1.0, 0.05), (1.0, 0.0), (0.001, 0.0), (0.0, 0.0)),
          sides=24, name="Cup", x=0, y=-1, z=10, sx=0.8, sy=0.8, sz=0.8)
 mylathe.set_draw_details(matsh, [shapebump, shapeshine], 0.0, 1.0)
 mylathe.set_alpha(0.5)
@@ -103,7 +105,7 @@ while DISPLAY.loop_running():
   mytcone.rotateIncY(2)
   mytcone.rotateIncZ(-1)
 
-  mytorus.draw(shinesh, [patimg, shapebump, shapeshine], 4.0, 0.6)
+  mytorus.draw(shinesh, [patimg, shapebump, shapeshine], 4.0, 0.3)
   mytorus.rotateIncY(3)
   mytorus.rotateIncZ(1)
 
