@@ -97,24 +97,29 @@ class FastTextColoured(object):
                     glyph = self.font.glyph_table[char]
                     self.uv[ind] = glyph[0:2]
                     
+                    char_pos = pos
                     if block.spacing == "F":
-                        self.locations[ind][0] = pos[0] + (float(glyph[2]) *  block.size * 0.5)
-                    else:
-                        self.locations[ind][0] = pos[0] #+ (64.0 - (float(glyph[2])) *  block.size * 0.25)
-                    self.locations[ind][1] = pos[1]
+                        offset = float(glyph[2]) * block.size * 0.5
+                        char_pos += np.multiply(offset, rot_vec)
+
+                    self.locations[ind][0] = char_pos[0]
+                    self.locations[ind][1] = char_pos[1]
                     self.locations[ind][2] = block.size
                     
                     # Set alpha
-                    self.normals[ind][0] = block.rot
+                    self.normals[ind][0] = block.rot + block.char_rot
                     self.normals[ind][1] = (block.colour[3] * 0.99) + (math.floor(block.colour[0] * 255))
                     self.normals[ind][2] = (block.colour[1] * 0.99) + (math.floor(block.colour[2] * 255))
                     
+                    spacing = 0.0
                     if block.spacing == "C":
-                        pos[0] += self.font.height * block.size * block.space
+                        spacing = self.font.height * block.size * block.space
                     if block.spacing == "M":
-                        pos[0] += glyph[2] * block.size * block.space
+                        spacing = glyph[2] * block.size * block.space
                     if block.spacing == "F":
-                        pos[0] += (glyph[2] * block.size) + (self.font.height * block.space * block.size)
+                        spacing = (glyph[2] * block.size) + (self.font.height * block.space * block.size)
+                    spacing = np.multiply(spacing, rot_vec)
+                    pos = np.add(pos, spacing)
                     index += 1
             
             elif block.rotation_changed:
@@ -145,7 +150,7 @@ class FastTextColoured(object):
         self.text.draw()
  
 class TextBlock(object):
-    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) ):
+    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0):
         """ Arguments:
         *x, y, z*:
           As usual
@@ -163,6 +168,10 @@ class TextBlock(object):
              Type of character spacing. C=Constant, M=Multiplier, F=Fixed space between chars
         *space*:
             Value to set the spacing to
+        *colour*:
+            drawn colour including alpha as format (0.99, 0.99, 0.99, 0.99)
+        *char_rot*:
+            character rotation in radians
         """
         self.x = x 
         self.y = y 
@@ -176,6 +185,7 @@ class TextBlock(object):
         self.spacing = spacing
         self.space = space
         self.colour = colour
+        self.char_rot = char_rot
 
         self.last_value = self          # hack so that static None object get initialization
         self.rotation_changed = False

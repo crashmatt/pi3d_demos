@@ -58,7 +58,7 @@ working_directory = os.path.dirname(os.path.realpath(__file__))
 font_path = os.path.abspath(os.path.join(working_directory, 'fonts', 'FreeSans.ttf'))
 #        self.warningFont = pi3d.Font(font_path, (255,0,0,255))
 pointFont = PointFont(font_path, font_colour, codepoints=chain(range(32,128)) )
-text = FastTextColoured.FastTextColoured(pointFont, CAMERA)
+text = FastTextColoured.FastTextColoured(pointFont, CAMERA, max_chars=200)
 
 
 moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
@@ -70,7 +70,7 @@ text.add_text_block(newtxt)
 newtxt = FastTextColoured.TextBlock(-150, 75, 0.1, 0.0, 18, the_junk, "valA", text_format="number: {:4.3f}", size=0.5, spacing="F", space=0.05, colour=(0.0, 0.0, 1.0, 1.0) )
 text.add_text_block(newtxt)
 
-newtxt = FastTextColoured.TextBlock(-250, -200, 0.1, 0.0, 10, the_junk, "fps", text_format="fps:{:2.1f}", size=0.75, spacing="C", space=0.6, colour=(0.0, 1.0, 1.0, 1.0) )
+newtxt = FastTextColoured.TextBlock(200, -200, 0.1, 0.0, 10, the_junk, "fps", text_format="fps:{:2.1f}", size=0.75, spacing="C", space=0.6, colour=(0.0, 1.0, 1.0, 1.0) )
 text.add_text_block(newtxt)
 
 textSize = 0.1
@@ -78,9 +78,18 @@ sizingText = FastTextColoured.TextBlock(-100, 150, 0.1, 0.0, 15, None, None, tex
 text.add_text_block(sizingText)
 
 textRotation = 0.0
-rotatingText = FastTextColoured.TextBlock(-200, -150, 0.1, textRotation, 15, None, None, text_format="Rotating chars", size=0.7, spacing="C", space=0.6, colour=(0.5, 0.5, 0.5, 1.0) )
+rotatingText = FastTextColoured.TextBlock(-200, -150, 0.1, textRotation, 15, None, None, text_format="Rotating text", size=0.7, spacing="C", space=0.6, colour=(1.0, 1.0, 1.0, 0.5) )
 text.add_text_block(rotatingText)
 
+rotatingChars = FastTextColoured.TextBlock(-300, -100, 0.1, 0.0, 15, None, None, text_format="Rotating chars", size=0.6, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+text.add_text_block(rotatingChars)
+
+textAlpha = 0.1
+alphaText = FastTextColoured.TextBlock(-250, -300, 0.1, math.pi/2, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
+text.add_text_block(alphaText)
+
+colourText = FastTextColoured.TextBlock(-300, 200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+text.add_text_block(colourText)
 
 
 frame_count = 0
@@ -109,6 +118,21 @@ while DISPLAY.loop_running():
         textRotation = -math.pi
     rotatingText.rot = textRotation
     rotatingText.last_value = rotatingText
+    
+    rotatingChars.char_rot = textRotation
+    rotatingChars.last_value = rotatingChars
+    
+    textAlpha += 0.01
+    if textAlpha >= 1.0:
+        textAlpha = 0.1
+    alphaText.colour = (alphaText.colour[0],alphaText.colour[1], alphaText.colour[2], textAlpha)
+    alphaText.last_value = alphaText
+    
+    red = math.cos(textRotation)
+    blue = math.cos(textRotation + (math.pi * 0.666) )    
+    green = math.cos(textRotation + (math.pi * 1.333) )    
+    colourText.colour = (red, green , blue, 1.0)
+    colourText.last_value = colourText
     
     now = time.time()
     frame_count += 1
