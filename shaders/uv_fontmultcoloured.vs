@@ -21,7 +21,7 @@ void main(void) {
   dist = vertex[2];
   rotn = mat2(cos(normal[0]), sin(normal[0]),
              -sin(normal[0]), cos(normal[0])); 
-  gl_PointSize = unib[2][2];
+  gl_PointSize = unib[2][2] * fract(dist);
   corner = texcoord;
   subsize = 0.057;	//normal[2];
   colour = vec4(normal[1]/256.0, fract(normal[2]), normal[2]/256.0, fract(normal[1]) );
