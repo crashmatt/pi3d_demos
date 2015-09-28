@@ -57,7 +57,7 @@ KEYBOARD = pi3d.Keyboard()
 LOGGER = pi3d.Log.logger(__name__)
 
 BACKGROUND_COLOR = (0.0, 0.0, 0.0, 0.0)
-DISPLAY = pi3d.Display.create(background=BACKGROUND_COLOR, frames_per_second=30)
+DISPLAY = pi3d.Display.create(background=BACKGROUND_COLOR, frames_per_second=30, samples=4)
 HWIDTH, HHEIGHT = DISPLAY.width / 2.0, DISPLAY.height / 2.0
 
 CAMERA = pi3d.Camera(is_3d=False)
@@ -153,9 +153,11 @@ while DISPLAY.loop_running():
 #      uv[ix[0],:] = np.random.randint(0, 7, (ix[0].shape[0], 2)) * 0.125 + 0.0125
 
       uv[:,:] = np.random.randint(0, 15, (MAX_BUGS,2)) * 0.0625
-      value = np.random.uniform(0.25, 0.99) + math.floor(np.random.uniform(0.5, 1.0) * 255)
+      value = np.random.uniform(0.75, 0.99,size=(MAX_BUGS))
+      value += np.random.uniform(0.25, 1.0, size=(MAX_BUGS)) * 255
       rot[:,1] = value
-      value = np.random.uniform(0.25, 0.99) + math.floor(np.random.uniform(0.5, 1.0) * 255)
+      value = np.random.uniform(0.25, 0.99,size=(MAX_BUGS))
+      value += np.random.uniform(0.25, 1.0, size=(MAX_BUGS)) * 255
       rot[:,2] = value
 
   k = KEYBOARD.read()
