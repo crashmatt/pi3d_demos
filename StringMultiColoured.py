@@ -91,6 +91,9 @@ text.add_text_block(alphaText)
 colourText = FastTextColoured.TextBlock(-300, 200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(colourText)
 
+spacingText = FastTextColoured.TextBlock(-350, -300, 0.1, 0.0, 10, None, None, text_format="Spacing", size=0.7, spacing="C", space=0.1, colour=(0.5, 1.0, 0.5, 1.0) )
+text.add_text_block(spacingText)
+
 
 frame_count = 0
 end_time = time.time() + 1.0
@@ -133,6 +136,9 @@ while DISPLAY.loop_running():
     green = math.cos(textRotation + (math.pi * 1.333) )    
     colourText.colour = (red, green , blue, 1.0)
     colourText.last_value = colourText
+    
+    spacingText.space = textAlpha
+    spacingText.last_value = spacingText
     
     now = time.time()
     frame_count += 1
