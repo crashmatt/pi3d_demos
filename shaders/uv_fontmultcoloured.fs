@@ -17,6 +17,7 @@ void main(void) {
   vec4 texc = texture2D(tex0, (rot_coord * subsize + corner));
   if (texc.a < unib[0][2]) discard; // ------ to allow rendering behind the transparent parts of this object
   gl_FragColor = colour; //texc
+  gl_FragColor *= texc.a;
 }
 
 
