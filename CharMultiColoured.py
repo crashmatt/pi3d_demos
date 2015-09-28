@@ -148,17 +148,16 @@ while DISPLAY.loop_running():
     vel[ix[0],1] += delta1y
     vel[ix[1],0] += delta2x
     vel[ix[1],1] += delta2y
-    # change image occasionally
-    if frame_num % 10 == 0:
-#      uv[ix[0],:] = np.random.randint(0, 7, (ix[0].shape[0], 2)) * 0.125 + 0.0125
+    
+    idx = frame_num % MAX_BUGS
+    uv[idx,:] = np.random.randint(0, 15) * 0.0625
+    value = np.random.uniform(0.75, 0.99)
+    value += np.floor(np.random.uniform(0.25, 1.0) * 255)
+    rot[idx,1] = value
+    value = np.random.uniform(0.25, 0.99)
+    value += np.floor(np.random.uniform(0.25, 1.0) * 255)
+    rot[idx,2] = value
 
-      uv[:,:] = np.random.randint(0, 15, (MAX_BUGS,2)) * 0.0625
-      value = np.random.uniform(0.75, 0.99,size=(MAX_BUGS))
-      value += np.random.uniform(0.25, 1.0, size=(MAX_BUGS)) * 255
-      rot[:,1] = value
-      value = np.random.uniform(0.25, 0.99,size=(MAX_BUGS))
-      value += np.random.uniform(0.25, 1.0, size=(MAX_BUGS)) * 255
-      rot[:,2] = value
 
   k = KEYBOARD.read()
   if k > -1:
