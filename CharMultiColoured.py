@@ -65,7 +65,7 @@ shader = pi3d.Shader("shaders/uv_fontmultcoloured")
 
 working_directory = os.path.dirname(os.path.realpath(__file__))
 font_path = os.path.abspath(os.path.join(working_directory, 'fonts', 'FreeSansBold.ttf'))
-font = PointFontColoured.PointFontColoured(font_path)   #usr/share/fonts/truetype/freefont/
+font = PointFontColoured.PointFontColoured(font_path, codepoints=range(32,255))   #usr/share/fonts/truetype/freefont/
 
 img = font
 #img = pi3d.Texture("textures/atlas01.png")
@@ -73,7 +73,7 @@ img = font
 loc = np.zeros((MAX_BUGS, 3))
 loc[:,0] = np.random.uniform(-HWIDTH, HWIDTH, MAX_BUGS)
 loc[:,1] = np.random.uniform(-HHEIGHT, HHEIGHT, MAX_BUGS)
-loc[:,2] = 0.0
+loc[:,2] = 0.99
 #loc[:,2] = np.random.normal((min_size + max_size) / 2.0,
 #                            (max_size - min_size) / 5.0,
 #                            MAX_BUGS) + np.random.randint(1, 8, MAX_BUGS)
@@ -150,13 +150,14 @@ while DISPLAY.loop_running():
     vel[ix[1],1] += delta2y
     
     idx = frame_num % MAX_BUGS
-    uv[idx,:] = np.random.randint(0, 15) * 0.0625
+    uv[idx,:] = np.random.randint(0, 15, (2)) * 0.0625
     value = np.random.uniform(0.75, 0.99)
     value += np.floor(np.random.uniform(0.25, 1.0) * 255)
     rot[idx,1] = value
     value = np.random.uniform(0.25, 0.99)
     value += np.floor(np.random.uniform(0.25, 1.0) * 255)
     rot[idx,2] = value
+    loc[idx,2] = np.random.uniform(0.2, 0.99)
 
 
   k = KEYBOARD.read()
