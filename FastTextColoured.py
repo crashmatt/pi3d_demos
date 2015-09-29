@@ -100,7 +100,8 @@ class FastTextColoured(object):
                     char_pos = pos
                     if block.spacing == "F":
                         offset = float(glyph[2]) * block.size * 0.5
-                        char_pos += np.multiply(offset, rot_vec)
+                        rot = rot_vec
+                        char_pos += np.multiply(offset, rot)
 
                     self.locations[ind][0] = char_pos[0]
                     self.locations[ind][1] = char_pos[1]
