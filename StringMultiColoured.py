@@ -47,12 +47,14 @@ BACKGROUND_COLOR = (0.0, 0.0, 0.0, 0.0)
 DISPLAY = pi3d.Display.create(background=BACKGROUND_COLOR, frames_per_second=30)
 HWIDTH, HHEIGHT = DISPLAY.width / 2.0, DISPLAY.height / 2.0
 
+HHWIDTH = HWIDTH/2
+
 CAMERA = pi3d.Camera(is_3d=False)
 
 font_colour = (255,255,255,255)
 
 the_junk = junk()
-text_pos = HWIDTH
+text_pos = HHWIDTH
 
 working_directory = os.path.dirname(os.path.realpath(__file__))
 font_path = os.path.abspath(os.path.join(working_directory, 'fonts', 'FreeSans.ttf'))
@@ -61,8 +63,8 @@ pointFont = PointFont(font_path, font_colour, codepoints=chain(range(32,128)) )
 text = FastTextColoured.FastTextColoured(pointFont, CAMERA, max_chars=200)
 
 
-#moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
-#text.add_text_block(moving_text)
+moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
+text.add_text_block(moving_text)
 
 newtxt = FastTextColoured.TextBlock(-100, -50, 0.1, 0.0, 14, None, None, text_format="Static string", size=0.9, spacing="F", space=0.05, colour=(0.0, 1.0, 0.0, 1.0) )
 text.add_text_block(newtxt)
@@ -100,9 +102,9 @@ end_time = time.time() + 1.0
 
 while DISPLAY.loop_running():
     text_pos -= 3
-    if text_pos < -HWIDTH:
-        text_pos = HWIDTH
-#    moving_text.x = text_pos
+    if text_pos < -HHWIDTH:
+        text_pos = HHWIDTH
+    moving_text.set_position(x=text_pos)
 #    moving_text.last_value = None        # a hack to trigger a redraw in a new position
     the_junk.valA += 0.01
     the_junk.valA *= 1.0123
@@ -137,7 +139,6 @@ while DISPLAY.loop_running():
     colourText.set_colour(colour)
     
     spacingText.set_text(space=textSize)
-#    spacingText.last_value = spacingText
     
     now = time.time()
     frame_count += 1
