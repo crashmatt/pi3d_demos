@@ -81,11 +81,12 @@ class FastTextColoured(object):
             
             pos = [block.x, block.y]
             rot_vec = [math.cos(block.rot), math.sin(block.rot)]
-            value = block.get_value()
-                        
-            if value != block.last_value:
-                block.last_value = value
-                block.set_text()
+               
+            if block.data_obj != None:         
+                value = block.get_value()
+                if value != block.last_value:
+                    block.last_value = value
+                    block.set_text()
                     
   
   
@@ -194,23 +195,21 @@ class TextBlock(object):
             char_pos = np.add(pos, char_offset)
             location = [char_pos[0], char_pos[1], self.size]
             self._text_manager.locations[buff_index] = location
-            self._text_manager.normals[buff_index,0] = self.rot + self.char_rot
-        
-#                    self.locations[ind][0] = char_pos[0]
-#                    self.locations[ind][1] = char_pos[1]
-#                    self.locations[ind][2] = block.size
+            self._text_manager.normals[buff_index, 0] = self.rot + self.char_rot
+#        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, 0] 
 
         self._text_manager.set_do_reinit()
         
         
     def set_colour(self, colour=None, alpha=None):
-        normals = np.zeros((self.char_count,3), dtype=np.float)
-        
         if colour != None:
             self.colour[0:2] = colour[0:2]
         
         if alpha != None:
             self.colour[3] = alpha
+            
+        #Reset alpha to zero for all characters.  Prevents displaying old chars from longer strings
+        self._text_manager.normals[self._buffer_index:self._buffer_index+self.char_count, 1] = 0
                 
         #Fill an array with the colour to copy to the manager normals
         #rotation is included for efficiency
@@ -219,9 +218,8 @@ class TextBlock(object):
         normal[1] = (self.colour[3] * 0.99) + (math.floor(self.colour[0] * 255))
         normal[2] = (self.colour[1] * 0.99) + (math.floor(self.colour[2] * 255))
         
-
         #Only set colour alpha for string length. Zero for non displayed characters
-        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length,:] = normal
+        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, :] = normal
 
 #        normals = self._text_manager.normals
       
