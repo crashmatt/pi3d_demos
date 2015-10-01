@@ -37,7 +37,7 @@ class junk(object):
         self.valA = 0.0
         self.fps = 0.0
 
-        self.strA = "Moving string"
+        self.strA = "A moving string"
         
 
 KEYBOARD = pi3d.Keyboard()
@@ -61,8 +61,8 @@ pointFont = PointFont(font_path, font_colour, codepoints=chain(range(32,128)) )
 text = FastTextColoured.FastTextColoured(pointFont, CAMERA, max_chars=200)
 
 
-moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
-text.add_text_block(moving_text)
+#moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
+#text.add_text_block(moving_text)
 
 newtxt = FastTextColoured.TextBlock(-100, -50, 0.1, 0.0, 14, None, None, text_format="Static string", size=0.9, spacing="F", space=0.05, colour=(0.0, 1.0, 0.0, 1.0) )
 text.add_text_block(newtxt)
@@ -88,7 +88,7 @@ textAlpha = 0.1
 alphaText = FastTextColoured.TextBlock(-250, -300, 0.1, math.pi/2, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
 text.add_text_block(alphaText)
 
-colourText = FastTextColoured.TextBlock(-300, 200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+colourText = FastTextColoured.TextBlock(-300, -200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(colourText)
 
 spacingText = FastTextColoured.TextBlock(-350, -300, 0.1, 0.0, 10, None, None, text_format="Spacing", size=0.7, spacing="C", space=0.1, colour=(0.5, 1.0, 0.5, 1.0) )
@@ -102,8 +102,8 @@ while DISPLAY.loop_running():
     text_pos -= 3
     if text_pos < -HWIDTH:
         text_pos = HWIDTH
-    moving_text.x = text_pos
-    moving_text.last_value = None        # a hack to trigger a redraw in a new position
+#    moving_text.x = text_pos
+#    moving_text.last_value = None        # a hack to trigger a redraw in a new position
     the_junk.valA += 0.01
     the_junk.valA *= 1.0123
     if the_junk.valA > 1000.0:
@@ -112,33 +112,32 @@ while DISPLAY.loop_running():
     textSize += 0.01
     if textSize > 0.99:
         textSize = 0.1
-        
-    sizingText.size = textSize
-    sizingText.last_value = sizingText  # a hack to trigger a redraw in a new size
+ 
+    sizingText.set_text(size=textSize)
     
     textRotation += 0.02
     if textRotation > math.pi:
         textRotation = -math.pi
-    rotatingText.rot = textRotation
-    rotatingText.last_value = rotatingText
-    
-    rotatingChars.char_rot = textRotation
-    rotatingChars.last_value = rotatingChars
+        
+    rotatingText.set_position(rot=textRotation)
+
+    rotatingChars.set_text(char_rot=textRotation)
+#    rotatingChars.char_rot = textRotation
+#    rotatingChars.last_value = rotatingChars
     
     textAlpha += 0.01
     if textAlpha >= 1.0:
         textAlpha = 0.1
-    alphaText.colour = (alphaText.colour[0],alphaText.colour[1], alphaText.colour[2], textAlpha)
-    alphaText.last_value = alphaText
+    alphaText.set_colour(alpha=textAlpha)
     
     red = math.cos(textRotation)
     blue = math.cos(textRotation + (math.pi * 0.666) )    
     green = math.cos(textRotation + (math.pi * 1.333) )    
-    colourText.colour = (red, green , blue, 1.0)
-    colourText.last_value = colourText
+    colour = [red, green , blue, 1.0]
+    colourText.set_colour(colour)
     
-    spacingText.space = textAlpha
-    spacingText.last_value = spacingText
+    spacingText.set_text(space=textSize)
+#    spacingText.last_value = spacingText
     
     now = time.time()
     frame_count += 1
@@ -146,7 +145,10 @@ while DISPLAY.loop_running():
         end_time = now + 1.0
         the_junk.fps = frame_count
         frame_count = 0
-    
+        if the_junk.strA == "A moving string":
+            the_junk.strA = "String moving"
+        else: 
+            the_junk.strA = "A moving string"
 #    the_junk.valA = random.uniform(-1000.0, 1000.0)
     text.regen()
     text.draw()

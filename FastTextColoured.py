@@ -33,6 +33,7 @@ from gettattra import *
 from numpy.f2py.auxfuncs import throw_error
 from __builtin__ import str
 import math
+from numpy import dtype
 
 class FastTextColoured(object):
     def __init__(self, font, camera, max_chars = 100):
@@ -58,9 +59,9 @@ class FastTextColoured(object):
         self.normals[:,2] = 0.0
         self.uv = np.zeros((max_chars, 2)) # u picnum.u v
 
-        self.text = None
-        
         self.text_blocks = []
+        self._first_free_char = 0
+        self._do_buffer_reinit = False
         
         self.text = Points(camera=camera, vertices=self.locations, normals=self.normals, tex_coords=self.uv,
                        point_size=self.font.height)
@@ -84,72 +85,32 @@ class FastTextColoured(object):
                         
             if value != block.last_value:
                 block.last_value = value
-
-                # Set alpha for whole text block to zero. Hides old strings that are longer than new ones
-                self.normals[char_index:char_index+block.char_count,1] = 0.0
-                
-                str = block.get_string(value)
-                            
-                index = 0
-                for char in str:
-                    ind = index + char_index
-                                   
-                    glyph = self.font.glyph_table[char]
-                    self.uv[ind] = glyph[0:2]
+                block.set_text()
                     
-                    char_pos = pos
-                    if block.spacing == "F":
-                        offset = float(glyph[2]) * block.size * 0.5
-                        rot = rot_vec
-                        char_pos += np.multiply(offset, rot)
-
-                    self.locations[ind][0] = char_pos[0]
-                    self.locations[ind][1] = char_pos[1]
-                    self.locations[ind][2] = block.size
-                    
-                    # Set alpha
-                    self.normals[ind][0] = block.rot + block.char_rot
-                    self.normals[ind][1] = (block.colour[3] * 0.99) + (math.floor(block.colour[0] * 255))
-                    self.normals[ind][2] = (block.colour[1] * 0.99) + (math.floor(block.colour[2] * 255))
-                    
-                    spacing = 0.0
-                    if block.spacing == "C":
-                        spacing = self.font.height * block.size * block.space
-                    if block.spacing == "M":
-                        spacing = glyph[2] * block.size * block.space
-                    if block.spacing == "F":
-                        spacing = (glyph[2] * block.size) + (self.font.height * block.space * block.size)
-                    spacing = np.multiply(spacing, rot_vec)
-                    pos = np.add(pos, spacing)
-                    index += 1
-            
-            elif block.rotation_changed:
-                #Set the rotation of the block 
-                self.normals[char_index:char_index+block.char_count,0] = block.rot
-                   
-            char_index = char_index + block.char_count
-                    
-        self.text.buf[0].re_init(pts=self.locations, normals=self.normals, texcoords=self.uv) # reform opengles array_buffer
+  
   
     def add_text_block(self, text_block):
+        if self._first_free_char + text_block.char_count >= self.max_chars:
+            print("failed to allocate space in characers for " + text_block.char_count + " characters")
+            return -1
         self.text_blocks.append(text_block)
-        return len(self.text_blocks) - 1
+        text_block.set_text_manager(self, self._first_free_char)
+        text_block.set_text()
+        self._first_free_char += text_block.char_count
+        return 0
     
-    def set_text_block_position_xy(self, index, x, y):
-        if index >= len(self.text_blocks):
-            return
-        block = self.text_blocks[index]
-        block.x = x
-        block.y = y
-        
-    def set_text_block_rotation(self, index, rot):
-        if index >= len(self.text_blocks):
-            return
-        self.text_blocks[index].rot = rot
-
+    
     def draw(self):
+        if self._do_buffer_reinit == True:
+            self.text.buf[0].re_init(pts=self.locations, normals=self.normals, texcoords=self.uv) # reform opengles array_buffer
+
         self.text.draw()
+        
+    def set_do_reinit(self):
+        self._do_buffer_reinit = True
  
+ 
+
 class TextBlock(object):
     def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0):
         """ Arguments:
@@ -185,22 +146,132 @@ class TextBlock(object):
         self.size = size
         self.spacing = spacing
         self.space = space
-        self.colour = colour
+        self.colour = [colour[0],colour[1],colour[2],colour[3]]
         self.char_rot = char_rot
 
         self.last_value = self          # hack so that static None object get initialization
         self.rotation_changed = False
         
+        self._buffer_index = 0
+        self._text_manager = None
+        self._string_length = 0
+        
+        self.char_offsets = [0.0]*char_count
+        
+        str = self.get_string(self.get_value())
+        self._string_length = len(str)
+        
+
+    def set_text_manager(self, manager, buffer_index):
+        self._text_manager = manager
+        self._buffer_index = buffer_index
         
     def get_value(self):
         if(self.attr != None) and (self.data_obj != None):
             return getattra(self.data_obj, self.attr, None)
         return None
         
-                 
     def get_string(self, value):        
         if(value != None):
-            return self.text_format.format(value)
+            str = self.text_format.format(value)
+            self._string_length = len(str)
+            return str
 
         return self.text_format
+    
+    def set_position(self, x=None, y=None, z=None, rot=None):
+        if x != None: self.x = x
+        if y != None: self.y = y
+        if z != None: self.z = z
+        if rot != None: self.rot = rot
+        
+        pos = [self.x, self.y]
+        rot_vec = [math.cos(self.rot), math.sin(self.rot)]
+        
+        for index in range(0, self._string_length):
+            buff_index = index + self._buffer_index
+            char_offset = np.multiply(rot_vec, self.char_offsets[index])
+            char_pos = np.add(pos, char_offset)
+            location = [char_pos[0], char_pos[1], self.size]
+            self._text_manager.locations[buff_index] = location
+            self._text_manager.normals[buff_index,0] = self.rot + self.char_rot
+        
+#                    self.locations[ind][0] = char_pos[0]
+#                    self.locations[ind][1] = char_pos[1]
+#                    self.locations[ind][2] = block.size
+
+        self._text_manager.set_do_reinit()
+        
+        
+    def set_colour(self, colour=None, alpha=None):
+        normals = np.zeros((self.char_count,3), dtype=np.float)
+        
+        if colour != None:
+            self.colour[0:2] = colour[0:2]
+        
+        if alpha != None:
+            self.colour[3] = alpha
+                
+        #Fill an array with the colour to copy to the manager normals
+        #rotation is included for efficiency
+        normal = np.zeros((3), dtype=np.float)
+        normal[0] = self.rot + self.char_rot
+        normal[1] = (self.colour[3] * 0.99) + (math.floor(self.colour[0] * 255))
+        normal[2] = (self.colour[1] * 0.99) + (math.floor(self.colour[2] * 255))
+        
+
+        #Only set colour alpha for string length. Zero for non displayed characters
+        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length,:] = normal
+
+#        normals = self._text_manager.normals
+      
+        
+        
+    def set_text(self, text_format=None, size=None, spacing=None, space=None , char_rot=None, set_pos=True, set_colour=True):
+        if text_format != None: self.text_format = text_format
+        if size != None: self.size = size
+        if spacing != None: self.spacing = spacing
+        if space != None: self.space = space
+        if char_rot != None: self.char_rot = char_rot
+                
+        str = self.get_string(self.get_value())
+        if len(str) > self.char_count:
+            print("failed to fit string in buffer")            
+            str = " "
+            self._string_length = 1
+        else:
+            self._string_length = len(str)
+        
+        pos = 0.0
+        index = 0
+        
+        for char in str:
+            glyph = self._text_manager.font.glyph_table[char]
+            self._text_manager.uv[index+self._buffer_index] = glyph[0:2]
+                
+            char_offset = pos   
+            if self.spacing == "F":
+                char_offset += float(glyph[2]) * self.size * 0.5
+            
+            self.char_offsets[index] = char_offset
+
+            spacing = 0.0
+            if self.spacing == "C":
+                spacing = self._text_manager.font.height * self.size * self.space
+            if self.spacing == "M":
+                spacing = glyph[2] * self.size * self.space
+            if self.spacing == "F":
+                spacing = (glyph[2] * self.size) + (self._text_manager.font.height * self.space * self.size)
+            pos += spacing
+            index += 1
+            
+        if set_pos:
+            self.set_position()
+        
+        if set_colour:
+            self.set_colour()
+
+        self._text_manager.set_do_reinit()  
+        
+        
         
