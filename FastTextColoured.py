@@ -187,8 +187,6 @@ class TextBlock(object):
         if rot != None: self.rot = rot
         
         pos = [self.x, self.y, self.size]
-        rot_mat = [ [math.cos(self.rot), 0.0] , [0.0, math.sin(self.rot)] ]
-        rot_vec = [math.cos(self.rot), math.sin(self.rot)]
         
         locations = np.zeros((self.char_count, 3), dtype=np.float)
         locations[:, 0] = np.multiply(self.char_offsets, math.cos(self.rot))
@@ -196,16 +194,7 @@ class TextBlock(object):
         locations = np.add(locations, pos)
         self._text_manager.locations[self._buffer_index:self._buffer_index+self.char_count, :] = locations
         
-#        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, :] = locations
-#        for index in range(0, self._string_length):
-#            buff_index = index + self._buffer_index
-#            char_offset = np.multiply(rot_vec, self.char_offsets[index])
-#            char_pos = np.add(pos, char_offset)
-#            location = [char_pos[0], char_pos[1], self.size]
-#            self._text_manager.locations[buff_index] = location
-#            self._text_manager.normals[buff_index, 0] = self.rot + self.char_rot
-        
-        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, 0] 
+        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, 0] = self.rot + self.char_rot
 
         self._text_manager.set_do_reinit()
         
@@ -241,34 +230,37 @@ class TextBlock(object):
         if space != None: self.space = space
         if char_rot != None: self.char_rot = char_rot
                 
-        str = self.get_string(self.get_value())
-        if len(str) > self.char_count:
-            print("failed to fit string in buffer")            
-            str = " "
-            self._string_length = 1
+        if (self.data_obj != None):
+            str = self.get_string(self.get_value())
         else:
-            self._string_length = len(str)
+            str = self.text_format
         
         pos = 0.0
         index = 0
+        
+        const_width = 0.0
+        vari_width = 0.0
+        if self.spacing == "C":
+            const_width = self._text_manager.font.height * self.size * self.space
+        if self.spacing == "M":
+            vari_width = self.size * self.space
+        if self.spacing == "F":
+            vari_width = self.size
+            const_width =  (self._text_manager.font.height * self.space * self.size)        
         
         for char in str:
             glyph = self._text_manager.font.glyph_table[char]
             self._text_manager.uv[index+self._buffer_index] = glyph[0:2]
                 
-            char_offset = pos   
+            char_offset = pos
+            
             if self.spacing == "F":
+                #center character to the right 
                 char_offset += float(glyph[2]) * self.size * 0.5
             
             self.char_offsets[index] = char_offset
 
-            spacing = 0.0
-            if self.spacing == "C":
-                spacing = self._text_manager.font.height * self.size * self.space
-            if self.spacing == "M":
-                spacing = glyph[2] * self.size * self.space
-            if self.spacing == "F":
-                spacing = (glyph[2] * self.size) + (self._text_manager.font.height * self.space * self.size)
+            spacing = (glyph[2] * vari_width) + const_width
             pos += spacing
             index += 1
             
