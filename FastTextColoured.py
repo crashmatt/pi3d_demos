@@ -186,17 +186,26 @@ class TextBlock(object):
         if z != None: self.z = z
         if rot != None: self.rot = rot
         
-        pos = [self.x, self.y]
+        pos = [self.x, self.y, self.size]
+        rot_mat = [ [math.cos(self.rot), 0.0] , [0.0, math.sin(self.rot)] ]
         rot_vec = [math.cos(self.rot), math.sin(self.rot)]
         
-        for index in range(0, self._string_length):
-            buff_index = index + self._buffer_index
-            char_offset = np.multiply(rot_vec, self.char_offsets[index])
-            char_pos = np.add(pos, char_offset)
-            location = [char_pos[0], char_pos[1], self.size]
-            self._text_manager.locations[buff_index] = location
-            self._text_manager.normals[buff_index, 0] = self.rot + self.char_rot
-#        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, 0] 
+        locations = np.zeros((self.char_count, 3), dtype=np.float)
+        locations[:, 0] = np.multiply(self.char_offsets, math.cos(self.rot))
+        locations[:, 1] = np.multiply(self.char_offsets, math.sin(self.rot))
+        locations = np.add(locations, pos)
+        self._text_manager.locations[self._buffer_index:self._buffer_index+self.char_count, :] = locations
+        
+#        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, :] = locations
+#        for index in range(0, self._string_length):
+#            buff_index = index + self._buffer_index
+#            char_offset = np.multiply(rot_vec, self.char_offsets[index])
+#            char_pos = np.add(pos, char_offset)
+#            location = [char_pos[0], char_pos[1], self.size]
+#            self._text_manager.locations[buff_index] = location
+#            self._text_manager.normals[buff_index, 0] = self.rot + self.char_rot
+        
+        self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, 0] 
 
         self._text_manager.set_do_reinit()
         
