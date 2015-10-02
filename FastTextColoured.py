@@ -34,6 +34,7 @@ from numpy.f2py.auxfuncs import throw_error
 from __builtin__ import str
 import math
 from numpy import dtype
+import colorsys
 
 class FastTextColoured(object):
     def __init__(self, font, camera, max_chars = 100):
@@ -212,10 +213,32 @@ class TextBlock(object):
         
         #Only set colour alpha for string length. Zero for non displayed characters
         self._text_manager.normals[self._buffer_index:self._buffer_index+self._string_length, :] = normal
-
-#        normals = self._text_manager.normals
       
+      
+    def set_colour_gradient(self, colour1, colour2, alpha1=None, alpha2=None):
+        hsv1 = colorsys.rgb_to_hsv(colour1[0], colour1[1], colour1[2])
+        hsv2 = colorsys.rgb_to_hsv(colour2[0], colour2[1], colour2[2])
+            
+        normal = np.zeros((3), dtype=np.float)
+        normal[0] = self.rot + self.char_rot
         
+        if alpha1 == None:
+            alpha1 = self.colour[3]
+        if alpha2 == None:
+            alpha2 = alpha1
+        
+        for index in range(0,self._string_length):
+            h = np.interp(index, [0,self._string_length], [hsv1[0], hsv2[0]])
+            s = np.interp(index, [0,self._string_length], [hsv1[1], hsv2[1]])
+            v = np.interp(index, [0,self._string_length], [hsv1[2], hsv2[2]])
+            a = np.interp(index, [0,self._string_length], [alpha1, alpha2])
+            rgb = colorsys.hsv_to_rgb(h, s, v)
+            normal[1] = (a * 0.99) + (rgb[0] * 255)
+            normal[2] = (rgb[1] * 0.99) + (rgb[2] * 255)
+            
+            #Only set colour alpha for string length. Zero for non displayed characters
+            self._text_manager.normals[self._buffer_index+index, :] = normal
+       
         
     def set_text(self, text_format=None, size=None, spacing=None, space=None , char_rot=None, set_pos=True, set_colour=True):
         if text_format != None: self.text_format = text_format
@@ -225,10 +248,13 @@ class TextBlock(object):
         if char_rot != None: self.char_rot = char_rot
                 
         if (self.data_obj != None):
-            str = self.get_string(self.get_value())
+            value = self.get_value()
+            str = self.get_string(value)
+            self.last_value = value
         else:
             str = self.text_format
-        
+        self._string_length =len(str)
+         
         pos = 0.0
         index = 0
         
@@ -263,7 +289,7 @@ class TextBlock(object):
         
         if set_colour:
             self.set_colour()
-
+            
         self._text_manager.set_do_reinit()  
         
         

@@ -96,6 +96,13 @@ text.add_text_block(colourText)
 spacingText = FastTextColoured.TextBlock(-350, -300, 0.1, 0.0, 10, None, None, text_format="Spacing", size=0.7, spacing="C", space=0.1, colour=(0.5, 1.0, 0.5, 1.0) )
 text.add_text_block(spacingText)
 
+gradientText = FastTextColoured.TextBlock(50, -250, 0.1, 0.0, 16, None, None, text_format="Colour Gradient", size=0.7, spacing="C", space=0.6, colour=(0.5, 1.0, 0.5, 1.0) )
+text.add_text_block(gradientText)
+gradientText.set_colour_gradient((1.0, 0.0, 0.0, 1.0), (0.0, 1.0, 0.0, 0.0), 1.0, 1.0)
+
+alphaGradientText = FastTextColoured.TextBlock(50, -100, 0.1, 0.0, 16, None, None, text_format="Alpha Gradient", size=0.7, spacing="C", space=0.6, colour=(0.5, 1.0, 0.5, 1.0) )
+text.add_text_block(alphaGradientText)
+alphaGradientText.set_colour_gradient((1.0, 1.0, 1.0, 1.0), (1.0, 1.0, 1.0, 0.0), 1.0, 0.25)
 
 frame_count = 0
 end_time = time.time() + 1.0
@@ -122,10 +129,7 @@ while DISPLAY.loop_running():
         textRotation = -math.pi
         
     rotatingText.set_position(rot=textRotation)
-
     rotatingChars.set_text(char_rot=textRotation)
-#    rotatingChars.char_rot = textRotation
-#    rotatingChars.last_value = rotatingChars
     
     textAlpha += 0.01
     if textAlpha >= 1.0:
