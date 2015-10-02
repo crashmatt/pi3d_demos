@@ -76,13 +76,7 @@ class FastTextColoured(object):
 #        self.normals[:,1] = 0.0
 
         for block in self.text_blocks:
-            if (char_index + block.char_count) < self.max_chars:
-                SystemError("FastText exceeded maximum characters")
-            
-            pos = [block.x, block.y]
-            rot_vec = [math.cos(block.rot), math.sin(block.rot)]
-               
-            if block.data_obj != None:         
+            if block.data_obj != None:
                 value = block.get_value()
                 if value != block.last_value:
                     block.last_value = value
