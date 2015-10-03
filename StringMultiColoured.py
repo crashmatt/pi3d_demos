@@ -87,7 +87,7 @@ rotatingChars = FastTextColoured.TextBlock(-300, -100, 0.1, 0.0, 15, None, None,
 text.add_text_block(rotatingChars)
 
 textAlpha = 0.1
-alphaText = FastTextColoured.TextBlock(-250, -300, 0.1, math.pi/2, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
+alphaText = FastTextColoured.TextBlock(-250, -300, 0.1, 90.0, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
 text.add_text_block(alphaText)
 
 colourText = FastTextColoured.TextBlock(-300, -200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
@@ -124,9 +124,9 @@ while DISPLAY.loop_running():
  
     sizingText.set_text(size=textSize)
     
-    textRotation += 0.02
-    if textRotation > math.pi:
-        textRotation = -math.pi
+    textRotation += 1.0
+    if textRotation >= 180.0:
+        textRotation -= 360.0
         
     rotatingText.set_position(rot=textRotation)
     rotatingChars.set_text(char_rot=textRotation)
@@ -136,9 +136,10 @@ while DISPLAY.loop_running():
         textAlpha = 0.1
     alphaText.set_colour(alpha=textAlpha)
     
-    red = math.cos(textRotation)
-    blue = math.cos(textRotation + (math.pi * 0.666) )    
-    green = math.cos(textRotation + (math.pi * 1.333) )    
+    colour_angle = math.radians(textRotation)
+    red = math.cos(colour_angle)
+    blue = math.cos(colour_angle + (math.pi * 0.666) )    
+    green = math.cos(colour_angle + (math.pi * 1.333) )    
     colour = [red, green , blue, 1.0]
     colourText.set_colour(colour)
     

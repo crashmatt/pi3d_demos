@@ -134,7 +134,7 @@ class TextBlock(object):
         self.x = x 
         self.y = y 
         self.z = z 
-        self.rot = rot 
+        self.rot = math.radians(rot) 
         self.char_count = char_count
         self.data_obj = data_obj
         self.attr = attr
@@ -143,7 +143,7 @@ class TextBlock(object):
         self.spacing = spacing
         self.space = space
         self.colour = [colour[0],colour[1],colour[2],colour[3]]
-        self.char_rot = char_rot
+        self.char_rot = math.radians(char_rot)
 
         self.last_value = self          # hack so that static None object get initialization
         self.rotation_changed = False
@@ -179,7 +179,7 @@ class TextBlock(object):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
-        if rot != None: self.rot = rot
+        if rot != None: self.rot = math.radians(rot)
         
         pos = [self.x, self.y, self.size]
         
@@ -216,6 +216,11 @@ class TextBlock(object):
       
       
     def set_colour_gradient(self, colour1, colour2, alpha1=None, alpha2=None):
+        ''' Colour each character with a gradient from colour1 to colour2
+        Interpolate hsv instead of rgb since it is a more natural change.
+        This is quite processor intensive so not intended to be dynamic
+        Only compatible with static text, reposition will result in default colour
+        '''
         hsv1 = colorsys.rgb_to_hsv(colour1[0], colour1[1], colour1[2])
         hsv2 = colorsys.rgb_to_hsv(colour2[0], colour2[1], colour2[2])
             
@@ -245,8 +250,9 @@ class TextBlock(object):
         if size != None: self.size = size
         if spacing != None: self.spacing = spacing
         if space != None: self.space = space
-        if char_rot != None: self.char_rot = char_rot
+        if char_rot != None: self.char_rot = math.radians(char_rot)
                 
+        #If there is no data object then use the simple static string value
         if (self.data_obj != None):
             value = self.get_value()
             str = self.get_string(value)
