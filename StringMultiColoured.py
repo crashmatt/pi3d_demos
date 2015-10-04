@@ -97,10 +97,10 @@ text.add_text_block(spacingText)
 
 #String colour and alpha
 textAlpha = 0.1
-alphaText = FastTextColoured.TextBlock(-250, -300, 0.1, 90.0, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
+alphaText = FastTextColoured.TextBlock(-250, -300, 0.0, 90.0, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
 text.add_text_block(alphaText)
 
-colourText = FastTextColoured.TextBlock(-300, -200, 0.1, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+colourText = FastTextColoured.TextBlock(-300, -200, 1.0, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(colourText)
 
 gradientText = FastTextColoured.TextBlock(50, -250, 0.1, 0.0, 16, None, None, text_format="Colour Gradient", size=0.7, spacing="C", space=0.6, colour=(0.5, 1.0, 0.5, 1.0) )

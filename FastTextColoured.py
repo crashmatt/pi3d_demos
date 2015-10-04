@@ -183,7 +183,9 @@ class TextBlock(object):
         if z != None: self.z = z
         if rot != None: self.rot = math.radians(rot)
         
-        pos = [self.x, self.y, self.size]
+        size_pos, __  = math.modf(self.size)
+        size_pos += math.trunc(self.z * 10.0)   # depth has resolution of 0.1m and range of 25.5m
+        pos = [self.x, self.y, size_pos]
         
         locations = np.zeros((self.char_count, 3), dtype=np.float)
         locations[:, 0] = np.multiply(self.char_offsets, math.cos(self.rot))

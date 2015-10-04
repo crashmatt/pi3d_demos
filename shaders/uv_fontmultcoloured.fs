@@ -6,7 +6,6 @@ uniform vec3 unib[4];
 varying float dist;
 varying mat2 rotn;
 varying vec2 corner;
-//varying float alpha;
 varying vec4 colour;
 
 void main(void) {

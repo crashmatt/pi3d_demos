@@ -10,17 +10,20 @@ uniform vec3 unib[4];
 //uniform vec2 umult, vmult => unib[2]
 //uniform vec2 u_off, v_off => unib[3]
 
-varying float dist;
+varying float size;
 varying mat2 rotn;
 varying vec2 corner;
 varying vec4 colour;
+varying vec3 revertex;
 
 void main(void) {
-  dist = vertex[2];
-  gl_Position = modelviewmatrix[1] * vec4(vertex,1.0);
+  size = fract(vertex[2]);
+  revertex = vertex;
+  revertex[2] = (revertex[2]-size) * 0.1;
+  gl_Position = modelviewmatrix[1] * vec4(revertex,1.0);
   rotn = mat2(cos(normal[0]), sin(normal[0]),
              -sin(normal[0]), cos(normal[0])); 
-  gl_PointSize = unib[2][2] * fract(dist);
+  gl_PointSize = unib[2][2] * size;
   corner = texcoord;
 
   // alpha	= frac(normal[1])
