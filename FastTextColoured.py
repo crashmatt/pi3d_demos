@@ -50,12 +50,14 @@ class FastTextColoured(object):
         self.shader = Shader("shaders/uv_fontmultcoloured")
         
         self.locations = np.zeros((max_chars, 3))
-        # :,2 for size range 0.0 to 0.999           
+        # :,2 for size and z offset. 
+        # size=fract(location[2] range 0.0 to 0.99)
+        # zoffset = (location[2]-size)*0.1
 
         self.normals = np.zeros((max_chars, 3))
         # :,0 for rotation
-        # :,1 for red and alpha
-        # :,2 for green and blue      
+        # :,1 for red and alpha, red=normal[1]/256, alpha=fract(normal[1])
+        # :,2 for green and blue, blue=normal[2]/256, green=fract(normal[2])    
         self.normals[:,1] = 0.0
         self.normals[:,2] = 0.0
         self.uv = np.zeros((max_chars, 2)) # u picnum.u v
@@ -65,7 +67,7 @@ class FastTextColoured(object):
         self._do_buffer_reinit = False
         
         self.text = Points(camera=camera, vertices=self.locations, normals=self.normals, tex_coords=self.uv,
-                       point_size=self.font.height)
+                       point_size=64)
         self.text.set_draw_details(self.shader, [self.font])
             
 
