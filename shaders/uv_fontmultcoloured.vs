@@ -13,16 +13,19 @@ uniform vec3 unib[4];
 varying float dist;
 varying mat2 rotn;
 varying vec2 corner;
-varying float subsize;
 varying vec4 colour;
 
 void main(void) {
-  gl_Position = modelviewmatrix[1] * vec4(vertex,1.0);
   dist = vertex[2];
+  gl_Position = modelviewmatrix[1] * vec4(vertex,1.0);
   rotn = mat2(cos(normal[0]), sin(normal[0]),
              -sin(normal[0]), cos(normal[0])); 
   gl_PointSize = unib[2][2] * fract(dist);
   corner = texcoord;
-  subsize = 0.057;	//normal[2];
+
+  // alpha	= frac(normal[1])
+  // red 	= normal[1]/256
+  // green 	= frac(normal[2])
+  // blue 	= normal[2]/256
   colour = vec4(normal[1]/256.0, fract(normal[2]), normal[2]/256.0, fract(normal[1]) );
 }
