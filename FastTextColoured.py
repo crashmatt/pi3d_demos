@@ -110,7 +110,7 @@ class FastTextColoured(object):
  
 
 class TextBlock(object):
-    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0):
+    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0, justify='R'):
         """ Arguments:
         *x, y, z*:
           As usual
@@ -146,7 +146,8 @@ class TextBlock(object):
         self.space = space
         self.colour = [colour[0],colour[1],colour[2],colour[3]]
         self.char_rot = math.radians(char_rot)
-
+        self.justify = justify
+ 
         self.last_value = self          # hack so that static None object get initialization
         self.rotation_changed = False
         
@@ -271,12 +272,12 @@ class TextBlock(object):
         const_width = 0.0
         vari_width = 0.0
         if self.spacing == "C":
-            const_width = self._text_manager.font.height * self.size * self.space
+            const_width = 64.0 * self.size * self.space
         if self.spacing == "M":
             vari_width = self.size * self.space
         if self.spacing == "F":
             vari_width = self.size
-            const_width =  (self._text_manager.font.height * self.space * self.size)        
+            const_width =  (64.0 * self.space * self.size)        
         
         for char in str:
             glyph = self._text_manager.font.glyph_table[char]
@@ -293,7 +294,12 @@ class TextBlock(object):
             spacing = (glyph[2] * vari_width) + const_width
             pos += spacing
             index += 1
-            
+        
+        if self.justify == 'C':
+            self.char_offsets = np.add(self.char_offsets, (pos - spacing) * -0.5)
+        if self.justify == 'L':
+            self.char_offsets = np.add(self.char_offsets, -pos + spacing)            
+        
         if set_pos:
             self.set_position()
         
