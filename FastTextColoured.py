@@ -61,7 +61,7 @@ class FastTextColoured(object):
         self.normals[:,1] = 0.0
         self.normals[:,2] = 0.0
         self.uv = np.zeros((max_chars, 2)) # u picnum.u v
-
+        
         self.text_blocks = []
         self._first_free_char = 0
         self._do_buffer_reinit = False
@@ -69,7 +69,11 @@ class FastTextColoured(object):
         self.text = Points(camera=camera, vertices=self.locations, normals=self.normals, tex_coords=self.uv,
                        point_size=64)
         self.text.set_draw_details(self.shader, [self.font])
-            
+        
+        #Reset all characters to space so there are no false character shadows
+        glyph = self.font.glyph_table[u' ']
+        self.uv[:] = glyph[0:2]
+        
 
     def regen(self):
         ##### regenerate text from text blocks
@@ -110,12 +114,12 @@ class FastTextColoured(object):
  
 
 class TextBlock(object):
-    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0, justify='R'):
+    def __init__(self, x, y, z, rot, char_count, data_obj, attr, text_format="{:s}", size=0.25, spacing="C", space=1.1, colour=(1.0,1.0,1.0,1.0) , char_rot=0.0, justify=0.0):
         """ Arguments:
         *x, y, z*:
           As usual
         *rot*:
-          TODO: rotation in unknown units??? 
+          rotation in degrees
         *data_obj*:
           Data object to use in text format
         *attr*:
@@ -131,7 +135,9 @@ class TextBlock(object):
         *colour*:
             drawn colour including alpha as format (0.99, 0.99, 0.99, 0.99)
         *char_rot*:
-            character rotation in radians
+            character rotation in degrees
+        *justify*:
+            Justification value. 0.0=Right, 1.0=Left, 0.5=Center
         """
         self.x = x 
         self.y = y 
@@ -295,10 +301,8 @@ class TextBlock(object):
             pos += spacing
             index += 1
         
-        if self.justify == 'C':
-            self.char_offsets = np.add(self.char_offsets, (pos - spacing) * -0.5)
-        if self.justify == 'L':
-            self.char_offsets = np.add(self.char_offsets, -pos + spacing)            
+        #Justification
+        self.char_offsets = np.add(self.char_offsets, (pos - spacing) * -self.justify)         
         
         if set_pos:
             self.set_position()
