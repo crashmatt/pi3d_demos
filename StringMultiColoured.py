@@ -87,7 +87,7 @@ text.add_text_block(sizingText)
 # String rotation and spacing
 textRotation = 0.0
 rotatingText = FastTextColoured.TextBlock(-200, -150, 0.1, textRotation, 15, None, None, text_format="Rotating text", size=0.7, spacing="C", space=0.6, colour=(1.0, 1.0, 1.0, 0.5), justify=0.5 )
-text.add_text_block(rotatingText), char_rot=None
+text.add_text_block(rotatingText)
 
 rotatingChars = FastTextColoured.TextBlock(-300, -100, 0.1, 0.0, 15, None, None, text_format="Rotating chars", size=0.6, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(rotatingChars)
