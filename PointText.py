@@ -18,10 +18,9 @@ from gettattra import *
 from __builtin__ import str
 import math
 import colorsys
-from TextBlock import TextBlock
 
 
-class FastTextColoured(object):
+class PointText(object):
     def __init__(self, font, camera, max_chars = 100):
         """ Arguments:
         *font*:

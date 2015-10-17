@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 PointFontColoured - For generating a font drawn with gl_point and recoloured using
  shader uv_fontmultcoloured
 
-FastTextColoured - Manages the collection of data for all of the strings to be drawn.
+PointText - Manages the collection of data for all of the strings to be drawn.
   Enables drawing all strings in one pass.
   
 TextBlock - A string which has its content, position, size, rotation, colour, alpha,
@@ -26,7 +26,8 @@ import demo
 import pi3d
 
 from PointFont  import PointFont
-import FastTextColoured
+import PointText
+from TextBlock import TextBlock, TextBlockColourGradient
 
 import os
 import math
@@ -62,54 +63,55 @@ font_path = os.path.abspath(os.path.join(working_directory, 'fonts', 'FreeSans.t
 
 # Create PointFont and the text manager to use it
 pointFont = PointFont(font_path, font_colour, codepoints=chain(range(32,128)) )
-text = FastTextColoured.FastTextColoured(pointFont, CAMERA, max_chars=200)
+text = PointText.PointText(pointFont, CAMERA, max_chars=200)
 
 #Basic static text
-newtxt = FastTextColoured.TextBlock(-100, -50, 0.1, 0.0, 14, None, None, text_format="Static string", size=0.9, spacing="F", space=0.05, colour=(0.0, 1.0, 0.0, 1.0) )
+newtxt = TextBlock(-100, -50, 0.1, 0.0, 14, None, None, text_format="Static string", size=0.9, spacing="F", space=0.05, colour=(0.0, 1.0, 0.0, 1.0) )
 text.add_text_block(newtxt)
 
 #The next three strings are formated with data from an object.  When the object data changes and the
 # text block is regenerated, the string is changed to the new data values.
-moving_text = FastTextColoured.TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
+moving_text = TextBlock(0, 0, 0.1, 0.0, 25, the_junk, "strA", text_format="{:s}", size=0.6, spacing="F", space=0.08, colour=(1.0, 0.0, 0.0, 1.0) )
 text.add_text_block(moving_text)
 
-newtxt = FastTextColoured.TextBlock(-150, 75, 0.1, 0.0, 18, the_junk, "valA", text_format="number: {:4.3f}", size=0.5, spacing="F", space=0.05, colour=(0.0, 0.0, 1.0, 1.0) )
+newtxt = TextBlock(-150, 75, 0.1, 0.0, 18, the_junk, "valA", text_format="number: {:4.3f}", size=0.5, spacing="F", space=0.05, colour=(0.0, 0.0, 1.0, 1.0) )
 text.add_text_block(newtxt)
 
-newtxt = FastTextColoured.TextBlock(200, -200, 0.1, 0.0, 10, the_junk, "fps", text_format="fps:{:2.1f}", size=0.75, spacing="C", space=0.6, colour=(0.0, 1.0, 1.0, 1.0) )
+newtxt = TextBlock(200, -200, 0.1, 0.0, 10, the_junk, "fps", text_format="fps:{:2.1f}", size=0.75, spacing="C", space=0.6, colour=(0.0, 1.0, 1.0, 1.0) )
 text.add_text_block(newtxt)
 
 
 textSize = 0.1
-sizingText = FastTextColoured.TextBlock(-100, 150, 0.1, 0.0, 15, None, None, text_format="Resizing text", size=textSize, spacing="F", space=0.05, colour=(1.0, 1.0, 0.0, 1.0) )
+sizingText = TextBlock(-100, 150, 0.1, 0.0, 15, None, None, text_format="Resizing text", size=textSize, spacing="F", space=0.05, colour=(1.0, 1.0, 0.0, 1.0) )
 text.add_text_block(sizingText)
 
 # String rotation and spacing
 textRotation = 0.0
-rotatingText = FastTextColoured.TextBlock(-200, -150, 0.1, textRotation, 15, None, None, text_format="Rotating text", size=0.7, spacing="C", space=0.6, colour=(1.0, 1.0, 1.0, 0.5), justify=0.5 )
+rotatingText = TextBlock(-200, -150, 0.1, textRotation, 15, None, None, text_format="Rotating text", size=0.7, spacing="C", space=0.6, colour=(1.0, 1.0, 1.0, 0.5), justify=0.5 )
 text.add_text_block(rotatingText)
 
-rotatingChars = FastTextColoured.TextBlock(-300, -100, 0.1, 0.0, 15, None, None, text_format="Rotating chars", size=0.6, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+rotatingChars = TextBlock(-300, -100, 0.1, 0.0, 15, None, None, text_format="Rotating chars", size=0.6, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(rotatingChars)
 
-spacingText = FastTextColoured.TextBlock(-350, -300, 0.1, 0.0, 10, None, None, text_format="Spacing", size=0.7, spacing="C", space=0.1, colour=(0.5, 1.0, 0.5, 1.0) )
+spacingText = TextBlock(-350, -300, 0.1, 0.0, 10, None, None, text_format="Spacing", size=0.7, spacing="C", space=0.1, colour=(0.5, 1.0, 0.5, 1.0) )
 text.add_text_block(spacingText)
 
 #String colour and alpha
 textAlpha = 0.1
-alphaText = FastTextColoured.TextBlock(-250, -300, 0.0, 90.0, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
+alphaText = TextBlock(-250, -300, 0.0, 90.0, 15, None, None, text_format="Alpha change", size=0.99, spacing="C", space=0.6, colour=(0.99, 0.99, 0.99, textAlpha) )
 text.add_text_block(alphaText)
 
-colourText = FastTextColoured.TextBlock(-300, -200, 1.0, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
+colourText = TextBlock(-300, -200, 1.0, 0.0, 15, None, None, text_format="Colour change", size=0.8, spacing="C", space=0.6, colour=(0.99, 0.5, 0.5, 1.0) )
 text.add_text_block(colourText)
 
-gradientText = FastTextColoured.TextBlock(50, -250, 0.1, 0.0, 16, None, None, text_format="Colour Gradient", size=0.7, spacing="C", space=0.6, colour=(0.5, 1.0, 0.5, 1.0) )
+colourGradient = TextBlockColourGradient((1.0,0.0,0.0,1.0),(0.0,1.0,0.0,1.0))
+gradientText = TextBlock(50, -250, 0.1, 0.0, 16, None, None, text_format="Colour Gradient", size=0.7, spacing="C", space=0.6, colour=colourGradient )
 text.add_text_block(gradientText)
-gradientText.set_colour_gradient((1.0, 0.0, 0.0, 1.0), (0.0, 1.0, 0.0, 0.0), 1.0, 1.0)
 
-alphaGradientText = FastTextColoured.TextBlock(50, -100, 0.1, 0.0, 16, None, None, text_format="Alpha Gradient", size=0.7, spacing="C", space=0.6, colour=(0.5, 1.0, 0.5, 1.0) )
+
+alphaGradient = TextBlockColourGradient((1.0,1.0,1.0,1.0),(1.0,1.0,1.0,0.25))
+alphaGradientText = TextBlock(50, -100, 0.1, 0.0, 16, None, None, text_format="Alpha Gradient", size=0.7, spacing="C", space=0.6, colour=alphaGradient )
 text.add_text_block(alphaGradientText)
-alphaGradientText.set_colour_gradient((1.0, 1.0, 1.0, 1.0), (1.0, 1.0, 1.0, 0.0), 1.0, 0.25)
 
 frame_count = 0
 end_time = time.time() + 1.0
@@ -141,14 +143,14 @@ while DISPLAY.loop_running():
     textAlpha += 0.01
     if textAlpha >= 1.0:
         textAlpha = 0.1
-    alphaText.set_colour(alpha=textAlpha)
+    alphaText.colouring.set_colour(alpha=textAlpha)
     
     colour_angle = math.radians(textRotation)
     red = math.cos(colour_angle)
     blue = math.cos(colour_angle + (math.pi * 0.666) )    
     green = math.cos(colour_angle + (math.pi * 1.333) )    
     colour = [red, green , blue, 1.0]
-    colourText.set_colour(colour)
+    colourText.colouring.set_colour(colour)
     
     spacingText.set_text(space=textSize)
     
