@@ -80,8 +80,8 @@ class TextBlockColourGradient(TextBlockColour):
             v = np.interp(index, [0,textBlock._string_length], [hsv1[2], hsv2[2]])
             a = np.interp(index, [0,textBlock._string_length], [colour1[3], colour2[3]])
             rgb = colorsys.hsv_to_rgb(h, s, v)
-            normal[1] = (a * 0.99) + (rgb[0] * 255)
-            normal[2] = (rgb[1] * 0.99) + (rgb[2] * 255)
+            normal[1] = (a * 0.99) + math.floor((rgb[0] * 255))
+            normal[2] = (rgb[1] * 0.99) + math.floor((rgb[2] * 255))
             
             #Only set colour alpha for string length. Zero for non displayed characters
             manager.normals[textBlock._buffer_index+index, :] = normal
@@ -177,6 +177,7 @@ class TextBlock(object):
         size_pos += math.trunc(self.z * 10.0)   # depth has resolution of 0.1m and range of 25.5m
         pos = [self.x, self.y, size_pos]
         
+        #Locations are the pre calculated character offset positions multiplied by the string rotation vector
         locations = np.zeros((self.char_count, 3), dtype=np.float)
         locations[:, 0] = np.multiply(self.char_offsets, math.cos(self.rot))
         locations[:, 1] = np.multiply(self.char_offsets, math.sin(self.rot))
@@ -191,39 +192,6 @@ class TextBlock(object):
     def recolour(self):
         self.colouring.recolour()
       
-    #===========================================================================
-    #   
-    # def set_colour_gradient(self, colour1, colour2, alpha1=None, alpha2=None):
-    #     ''' Colour each character with a gradient from colour1 to colour2
-    #     Interpolate hsv instead of rgb since it is a more natural change.
-    #     This is quite processor intensive so not intended to be dynamic
-    #     Only compatible with static text, reposition will result in default colour
-    #     '''
-    #     hsv1 = colorsys.rgb_to_hsv(colour1[0], colour1[1], colour1[2])
-    #     hsv2 = colorsys.rgb_to_hsv(colour2[0], colour2[1], colour2[2])
-    #         
-    #     normal = np.zeros((3), dtype=np.float)
-    #     normal[0] = self.rot + self.char_rot
-    #     
-    #     if alpha1 == None:
-    #         alpha1 = self.colour[3]
-    #     if alpha2 == None:
-    #         alpha2 = alpha1
-    #     
-    #     for index in range(0,self._string_length):
-    #         h = np.interp(index, [0,self._string_length], [hsv1[0], hsv2[0]])
-    #         s = np.interp(index, [0,self._string_length], [hsv1[1], hsv2[1]])
-    #         v = np.interp(index, [0,self._string_length], [hsv1[2], hsv2[2]])
-    #         a = np.interp(index, [0,self._string_length], [alpha1, alpha2])
-    #         rgb = colorsys.hsv_to_rgb(h, s, v)
-    #         normal[1] = (a * 0.99) + (rgb[0] * 255)
-    #         normal[2] = (rgb[1] * 0.99) + (rgb[2] * 255)
-    #         
-    #         #Only set colour alpha for string length. Zero for non displayed characters
-    #         self._text_manager.normals[self._buffer_index+index, :] = normal
-    #    
-    #===========================================================================
-        
     def set_text(self, text_format=None, size=None, spacing=None, space=None , char_rot=None, set_pos=True, set_colour=True):
         if text_format != None: self.text_format = text_format
         if size != None: self.size = size
@@ -242,7 +210,9 @@ class TextBlock(object):
          
         pos = 0.0
         index = 0
-        
+                
+        #Now the string is updated set the correct glyphs and calculate the character offset positions.  
+        #This is not the same as the final char positions. 
         const_width = 0.0
         vari_width = 0.0
         if self.spacing == "C":
@@ -272,6 +242,7 @@ class TextBlock(object):
         #Justification
         self.char_offsets = np.add(self.char_offsets, (pos - spacing) * -self.justify)         
         
+        #Optional updates to support update optimisation strategies
         if set_pos:
             self.set_position()
         
