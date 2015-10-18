@@ -51,8 +51,6 @@ class TextBlockColourGradient(TextBlockColour):
     def set_colour(self, colour1=None, colour2=None):
         ''' Colour each character with a gradient from colour1 to colour2
         Interpolate hsv instead of rgb since it is a more natural change.
-        This is quite processor intensive so not intended to be dynamic
-        Only compatible with static text, reposition will result in default colour
         '''
         if colour1 != None:
             self.colour1 = colour1
